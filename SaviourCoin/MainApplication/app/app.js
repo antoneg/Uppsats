@@ -3,14 +3,14 @@ var web3 = new Web3('HTTP://127.0.0.1:7545');
 
 var contractJson = require('../build/contracts/SaviourCoin.json');
 
-var contractAddress = "0xcF4Cb7388577714Af530e2Ee261Ba0eB44558698";
+var contractAddress = "0x56e1D54506Ba7d0dd36c22059e4ACabcF4f3B291";
 var contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
-contract.methods.myFunction().call(
+contract.methods.helloWorld().call(
 	(err, result) => {console.log(result)});
 
-var acc1 = "0xb20D6C68775Aae022e0770f651a4Af3624Ad679c";
-var acc2 = "0x542A0f8c4F4DD6Cf4c4A6fD844ee5077413C2c48";
+var acc1 = "0x1D725392C358b5Be4E9944D8C6a8d716a7128434";
+var acc2 = "0xB83E4c4c35698b18CAdeF7Bec22CCDc83CaBEa85";
 
 contract.methods.transfer(acc2, 10).send({from: acc1})
 .once('receipt', (receipt) => {console.log("Yes")});

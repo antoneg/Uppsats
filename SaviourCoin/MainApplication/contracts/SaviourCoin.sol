@@ -70,7 +70,7 @@ contract SaviourCoin is EIP20Interface {
         return allowed[_owner][_spender];
     }
 
-    function myFunction() public pure returns (string memory) {
-        return "Hello!%";
+    function helloWorld() public pure returns (string memory) {
+        return "Hello there, I exists!";
     }
 }
