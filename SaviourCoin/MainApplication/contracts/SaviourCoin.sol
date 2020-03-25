@@ -69,4 +69,8 @@ contract SaviourCoin is EIP20Interface {
     function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
+
+    function myFunction() public pure returns (string memory) {
+        return "Hello!%";
+    }
 }
