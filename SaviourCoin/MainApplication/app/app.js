@@ -20,7 +20,6 @@ async function setUp(){
 
 }
 
-
 async function HelloExjobb(){
 	await contract.methods.helloWorld().call(
 		(err, result) => {console.log(result)});
@@ -33,7 +32,7 @@ async function getAccs(){
 
 async function transfer(from, to){
 	await	contract.methods.transfer(to, 10).send({from: from})
-	.once('receipt', (receipt) => {console.log("Yes")});
+	.once('receipt', (receipt) => {console.log("Transaction successfull!")});
 }
 
 async function checkBal(acc){
