@@ -32,26 +32,24 @@ async function getAccs(){
 
 async function transfer(from, to){
 	await	savContract.methods.transfer(to, 10).send({from: from})
-	.once('receipt', (receipt) => {console.log("Transaction successfull!")});
+	.once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
 }
 
 async function checkBal(acc){
 	await savContract.methods.balanceOf(acc).call(
-	(err, result) => {console.log(result)});
+	(err, result) => {console.log('\n' + result)});
 }
-
 
 async function addUserToForum(address, username, karma, from){
 	await	forumContract.methods.addUserToForum(address, username, karma).send({from: from})
-	.once('receipt', (receipt) => {console.log("Added user: " + receipt.events.AddUserToForum.returnValues._success)});
+	.once('receipt', (receipt) => {console.log('\n' + "Added user: " + receipt.events.AddUserToForum.returnValues._success)});
 }
 
 async function getMembers(address){
-	await forumContract.methods.getUserData(address).call(
-	(err, result) => {console.log("UserAddress: " + result._address + '\n' +
+	await forumContract.methods.getUserData(address).call(//{from: accounts[1]},
+	(err, result) => {console.log('\n' + "Memberdata {" + '\n' + "UserAddress: " + result._address + '\n' +
 																"UserName: " + result._userinfo + '\n' +
-															  "Karma: " + result._karma)});
+															  "Karma: " + result._karma + '\n' + "}")});
 }
-
 
 setUp();
