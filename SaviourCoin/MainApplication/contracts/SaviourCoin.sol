@@ -22,18 +22,6 @@ contract SaviourCoin is EIP20Interface {
     string public name;                   //fancy name: eg Simon Bucks
     uint8 public decimals;                //How many decimals to show.
     string public symbol;                 //An identifier: eg SBX
-    uint256 public forumID;
-    uint256 private forumIndex = 0;
-    mapping(address => uint256) public ids;
-
-    mapping(address => mapping (uint256 => userData)) public forums;
-    //mapping(uint256 => userData) forumData;
-
-    struct userData {
-      address userAddress;
-      bytes32 userName;
-      uint256 karma;
-    }
 
     constructor (
         uint256 _initialAmount,
@@ -46,7 +34,6 @@ contract SaviourCoin is EIP20Interface {
         name = _tokenName;                                   // Set the name for display purposes
         decimals = _decimalUnits;                            // Amount of decimals for display purposes
         symbol = _tokenSymbol;                               // Set the symbol for display purposes
-        forumID = 0;
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
@@ -82,32 +69,4 @@ contract SaviourCoin is EIP20Interface {
     function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
-
-    function helloWorld() public pure returns (string memory) {
-        return "Hello there, I exists!";
-    }
-
-    function generateForumID() public returns (uint256 id) {
-      forumID++;
-      ids[msg.sender] = forumID;
-      return forumID;
-    }
-
-    function getMyForumID() public view returns (uint256 id) {
-      return ids[msg.sender];
-    }
-
-    function addUserToForum(address _userAddress, bytes32 _userName, uint256 _karma) public returns (bool success){
-      userData storage forumUserData = forums[msg.sender][forumIndex];
-      forumUserData.userAddress = _userAddress;
-      forumUserData.userName = _userName;
-      forumUserData.karma = _karma;
-      forumIndex++;
-      return true;
-    }
-
-    function getCurrentForumIndex() public view returns (uint256){
-      return forumIndex;
-    }
-
 }
