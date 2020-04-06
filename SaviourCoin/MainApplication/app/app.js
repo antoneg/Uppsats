@@ -1,12 +1,12 @@
 
 var Web3 = require('web3');
-var web3 = new Web3('HTTP://127.0.0.1:8545');
+var web3 = new Web3('HTTP://127.0.0.1:7545');
 
 var savJson = require('../build/contracts/SaviourCoin.json');
 var forumJson = require('../build/contracts/Forum.json');
 
-var savAddress = "0x7dabfb876Ad110815522c43cFa6C3604F8009c6a";//contractJson.networks[1585781614091].address; // Denna måste hårdkodas in
-var forumAddress = "0x1050045a73C252cb652518FDAE0b8BB407aD27A9";
+var savAddress = "0x8158AEEbEd41940ee46080daE9946804C11f9e01";//contractJson.networks[1585781614091].address; // Denna måste hårdkodas in
+var forumAddress = "0x7a16873b85C63c360de636216Aa266D8E57e9E7A";
 
 var savContract = new web3.eth.Contract(savJson.abi, savAddress);
 var forumContract =  new web3.eth.Contract(forumJson.abi, forumAddress);
@@ -19,10 +19,12 @@ async function setUp(){
 	var from = accounts[0];
 	var to = accounts[1];
 	//await HelloExjobb();
-	await transfer(from, to);
-	await checkBal(from);
-  await addUserToForum(to, "A", 10, from);
-	await getMembers(to);
+//	await transfer(from, to);
+//	await checkBal(from);
+//  await addUserToForum(to, "A", 10, from);
+//	await getMembers(to);
+	await createForum("GenesisForum", from);
+	await getForumData(0);
 }
 
 async function getAccs(){
@@ -50,6 +52,16 @@ async function getMembers(address){
 	(err, result) => {console.log('\n' + "Memberdata {" + '\n' + "UserAddress: " + result._address + '\n' +
 																"UserName: " + result._userinfo + '\n' +
 															  "Karma: " + result._karma + '\n' + "}")});
+}
+
+async function createForum(fName, from){
+	await	forumContract.methods.createForum(fName).send({from: from})
+	.once('receipt', (receipt) => {console.log('\n' + "Forum created. ")});
+}
+
+async function getForumData(fid){
+	await forumContract.methods.getForumData(fid).call(
+	(err, result) => {console.log('\n' + result.Owner)});
 }
 
 setUp();
