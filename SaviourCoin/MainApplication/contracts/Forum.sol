@@ -17,12 +17,17 @@ contract Forum {
   mapping (address => forumData) private forums;
   mapping (uint => address) private fidOwner;
   uint256 private forumId;
-  address[] private testz;
+  mapping (address => uint256) addressForumId;
+//  address[] private testz;
 
   struct forumData{
     address owner;
     string forumName;
     uint256 fid;
+    uint256 userCount;
+    mapping(uint256 => userData) users;
+    mapping(address => uint256) userKey; //Equal to next userCount.
+    mapping(address => bool) userExists;
   }
 
     struct userData{
@@ -32,19 +37,22 @@ contract Forum {
     }
 
     constructor () public {
-      forumId = 0;
+      forumId = 1;
     }
 
     function createForum(string memory _fname) public returns (uint256 forum_created){
-      forums[msg.sender] = forumData(msg.sender, _fname, forumId);
-      uint256 x = getForumId();
-      fidOwner[x] = msg.sender;
-      testz.push(msg.sender);
+      forums[msg.sender] = forumData(msg.sender, _fname, forumId, 0);
+      forums[msg.sender].users[1] = userData(msg.sender, _fname, 0);
+      forums[msg.sender].userExists[msg.sender] = true;
+      forums[msg.sender].userKey[msg.sender] = 0;
+      forums[msg.sender].userCount ++;
+      fidOwner[forumId] = msg.sender;
       forumId = forumId + 1;
+
       return forumId;
     }
 
-    function getForumId() public returns (uint256 id){
+    function getForumId() public view returns (uint256 id){
       return forumId;
     }
 
@@ -56,22 +64,36 @@ contract Forum {
     }
 
     function addUserToForum(address _userAddress, string memory _userName, uint256 _karma) public returns (bool success){
-      userData memory newMember = userData(_userAddress, _userName, _karma);
-      if(forumUsers[msg.sender][_userAddress].userAddress == address(0x0)){
-        forumUsers[msg.sender][_userAddress] = newMember;
+      if(forums[msg.sender].owner != msg.sender){
+        return (msg.sender), "You need to create a forum first", 0);
+      }
+      if(!forums[msg.sender].userExists[_userAddress]){
+        forums[msg.sender].userCount++;
+        uint256 newUserCount = forums[msg.sender].userCount;
+        forums[msg.sender].users[newUserCount] = userData(_userAddress, _userName, 0);
+        forums[msg.sender].userExists[_userAddress] = true;
+        forums[msg.sender].userKey[_userAddress] = newUserCount;
         emit AddUserToForum(true, _userAddress, _userName, _karma);
         return true;
       }
+
       emit AddUserToForum(false, _userAddress, _userName, _karma);
       return false;
     }
 
     function getUserData(address _userAddress) public view returns (address _address, string memory _userinfo, uint256 _karma) {
-        address uaddress = forumUsers[msg.sender][_userAddress].userAddress;
-        string memory uname = forumUsers[msg.sender][_userAddress].userName;
-        uint256 karm = forumUsers[msg.sender][_userAddress].karma;
+        if(forums[msg.sender].owner = address(0x0)){
+          return (address(0x0), "You need to create a forum first", 0);
+        }
+        if(forums[msg.sender].userExists[_userAddress]){
+          uint256 uKey = forums[msg.sender].userKey[_userAddress];
+          address uaddress = forums[msg.sender].users[uKey].userAddress;
+          string memory uname = forums[msg.sender].users[uKey].userName;
+          uint256 karm = forums[msg.sender].users[uKey].karma;
+          return (uaddress, uname, karm);
+        }
+        return(address(0x0), "This user does not exists in your forum", 0);
 
-        return (uaddress, uname, karm);
     }
 
 

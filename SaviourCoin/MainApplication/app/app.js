@@ -18,6 +18,7 @@ async function setUp(){
 	console.log(accounts[0]);
 	var from = accounts[0];
 	var to = accounts[1];
+	var nobody = accounts[2];
 	//await HelloExjobb();
 //	await transfer(from, to);
 //	await checkBal(from);
@@ -25,6 +26,8 @@ async function setUp(){
 //	await getMembers(to);
 	await createForum("GenesisForum", from);
 	await getForumData(0);
+	await addUserToForum(to, "A", 10, from);
+	await getMembers(nobody);
 }
 
 async function getAccs(){
@@ -55,7 +58,7 @@ async function getMembers(address){
 }
 
 async function createForum(fName, from){
-	await	forumContract.methods.createForum(fName).send({from: from})
+	await	forumContract.methods.createForum(fName).send({from: from, gas: 6721975 })
 	.once('receipt', (receipt) => {console.log('\n' + "Forum created. ")});
 }
 
