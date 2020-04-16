@@ -1820,7 +1820,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.23",
-  "updatedAt": "2020-04-07T16:33:01.500Z",
+  "updatedAt": "2020-04-09T19:14:31.996Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {
