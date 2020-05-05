@@ -1,20 +1,9 @@
-//Klientsidan
-  //CHECK! Kunna se alla forum från klientsida.
-  //Se till att inte kunna bli tillagd i ett forum hur som helst.
-  //Mina uppgifter i ett forum.
- // Skicka säga "ok" att få bli tillagd i ett forum.
-//Forumskaparsida
-  // Kolla om användaren har godkänt att bli tillagd.
-  // Get userCount
-  // GetUser by usercount
 
-//pragma solidity ^0.5.0;
 pragma solidity ^0.5.16;
-
 
 contract Forum {
 
-  mapping (address => mapping (address => userData)) private forumUsers;
+  //mapping (address => mapping (address => userData)) private forumUsers;
   mapping (address => forumData) private forums;
   mapping (uint => address) private fidOwner;
   uint256 private forumId;
@@ -105,6 +94,17 @@ contract Forum {
       return (false);
     }
 
+    function setKarma(uint256 _karma, address _userAddress) public returns (bool succ){
+      if(forums[msg.sender].owner == address(0x0)){
+        return false;
+      }
+      if(!forums[msg.sender].userExists[_userAddress]){
+        return false;
+      }
+      uint256 ukey = forums[msg.sender].userKey[_userAddress];
+      forums[msg.sender].users[ukey].karma = _karma;
+      return true;
+    }
 
     function getUserData(address _userAddress) public view returns (bool succ, address _address, string memory _userinfo, uint256 _karma) {
         if(forums[msg.sender].owner == address(0x0)){
@@ -122,6 +122,44 @@ contract Forum {
         }
         return(false, address(0x0),"Something went wrong with adding a new member.", 0);
     }
+
+  function getUserData(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
+    if(forums[msg.sender].owner == address(0x0)){
+      return (false, address(0x0), "You need to create a forum first", 0);
+    }
+
+    if((forums[msg.sender].userCount < _ucount ) || _ucount < 0){
+      return (false, address(0x0), "This user does not exists", 0);
+    }
+
+    address uaddress = forums[msg.sender].users[_ucount].userAddress;
+    string memory uname = forums[msg.sender].users[_ucount].userName;
+    uint256 karma = forums[msg.sender].users[_ucount].karma;
+    return (true, uaddress, uname, karma);
+  }
+
+
+    function getUserCount() public view returns (uint256 _ucount){
+      return forums[msg.sender].userCount;
+    }
+
+    function getMyInfo(address _admin) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+      uint256 key = forums[_admin].userKey[msg.sender];
+      string memory uname = forums[_admin].users[key].userName;
+      uint256 karma = forums[_admin].users[key].karma;
+      uint256 fid = forums[_admin].fid;
+      return (fid, _admin, msg.sender, uname, karma);
+    }
+
+    function getMyInfo(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+      address admin = fidOwner[_fid];
+      uint256 key = forums[admin].userKey[msg.sender];
+      string memory uname = forums[admin].users[key].userName;
+      uint256 karma = forums[admin].users[key].karma;
+      uint256 fid = forums[admin].fid;
+      return (fid, admin, msg.sender, uname, karma);
+    }
+
     event Succ(bool success);
     event AddUserToForum(bool succ, string info, address _userAddress, string _userName);
     event CreateForum(bool succ, string info, address self, string fname, uint256 fid);
