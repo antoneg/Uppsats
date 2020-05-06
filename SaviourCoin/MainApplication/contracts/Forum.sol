@@ -1,34 +1,101 @@
+/*
+Implements EIP20 token standard: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
+.*/
 
-pragma solidity ^0.5.16;
 
-contract Forum {
+pragma solidity ^0.5.0;
 
-  //mapping (address => mapping (address => userData)) private forumUsers;
-  mapping (address => forumData) private forums;
-  mapping (uint => address) private fidOwner;
-  uint256 private forumId;
-  mapping (address => uint256) addressForumId;
-//  address[] private testz;
+import "./EIP20Interface.sol";
 
-  struct forumData{
-    address owner;
-    string forumName;
-    uint256 fid;
-    uint256 userCount;
-    mapping(uint256 => userData) users;
-    mapping(address => uint256) userKey; //Equal to next userCount.
-    mapping(address => bool) userExists;
-  }
+
+contract Forum is EIP20Interface {
+    // The coin
+    uint256 constant private MAX_UINT256 = 2**256 - 1;
+    mapping (address => uint256) public balances;
+    mapping (address => mapping (address => uint256)) public allowed;
+
+    string public name;
+    uint8 public decimals;
+    string public symbol;
+
+    // Forum
+    mapping (address => forumData) private forums;    // An address can hold a forum
+    mapping (uint => address) private fidOwner;       // A forumID (fid) is mapped to an owner of a forum with this fid.
+    uint256 private forumId;                          // Increments when a new forum is created
+    mapping (address => uint256) addressForumId;
+
+    struct forumData{
+      address owner;
+      string forumName;
+      uint256 fid;
+      uint256 userCount;
+      mapping(uint256 => userData) users;
+      mapping(address => uint256) userKey; //Equal to next userCount.
+      mapping(address => bool) userExists;
+    }
 
     struct userData{
       address userAddress;
       string userName;
       uint256 karma;
+      }
+
+    constructor (
+        uint256 _initialAmount,
+        string memory _tokenName,
+        uint8 _decimalUnits,
+        string memory _tokenSymbol
+    ) public {
+        balances[msg.sender] = _initialAmount;
+        totalSupply = _initialAmount;
+        name = _tokenName;
+        decimals = _decimalUnits;
+        symbol = _tokenSymbol;
+        forumId = 1;
     }
 
-    constructor () public {
-      forumId = 1;
+    // Coin functions...
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(balances[msg.sender] >= _value);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        emit Transfer(msg.sender, _to, _value); //solhint-disable-line indent, no-unused-vars
+        return true;
     }
+
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        uint256 allowance = allowed[_from][msg.sender];
+        require(balances[_from] >= _value && allowance >= _value);
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        if (allowance < MAX_UINT256) {
+            allowed[_from][msg.sender] -= _value;
+        }
+        emit Transfer(_from, _to, _value); //solhint-disable-line indent, no-unused-vars
+        return true;
+    }
+
+    function balanceOf(address _owner) public view returns (uint256 balance) {
+        return balances[_owner];
+    }
+
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        emit Approval(msg.sender, _spender, _value); //solhint-disable-line indent, no-unused-vars
+        return true;
+    }
+
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    // .. end of coin functions
+
+
+
+
+
+
+    // Forum functions...
 
     function createForum(string memory _fname) public returns (bool success){
       uint256 a = forums[msg.sender].fid;
@@ -123,20 +190,20 @@ contract Forum {
         return(false, address(0x0),"Something went wrong with adding a new member.", 0);
     }
 
-  function getUserData(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
-    if(forums[msg.sender].owner == address(0x0)){
-      return (false, address(0x0), "You need to create a forum first", 0);
-    }
+    function getUserData(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
+      if(forums[msg.sender].owner == address(0x0)){
+        return (false, address(0x0), "You need to create a forum first", 0);
+      }
 
-    if((forums[msg.sender].userCount < _ucount ) || _ucount < 0){
-      return (false, address(0x0), "This user does not exists", 0);
-    }
+      if((forums[msg.sender].userCount < _ucount ) || _ucount < 0){
+        return (false, address(0x0), "This user does not exists", 0);
+      }
 
-    address uaddress = forums[msg.sender].users[_ucount].userAddress;
-    string memory uname = forums[msg.sender].users[_ucount].userName;
-    uint256 karma = forums[msg.sender].users[_ucount].karma;
-    return (true, uaddress, uname, karma);
-  }
+      address uaddress = forums[msg.sender].users[_ucount].userAddress;
+      string memory uname = forums[msg.sender].users[_ucount].userName;
+      uint256 karma = forums[msg.sender].users[_ucount].karma;
+      return (true, uaddress, uname, karma);
+      }
 
 
     function getUserCount() public view returns (uint256 _ucount){
@@ -158,6 +225,36 @@ contract Forum {
       uint256 karma = forums[admin].users[key].karma;
       uint256 fid = forums[admin].fid;
       return (fid, admin, msg.sender, uname, karma);
+    }
+
+
+    function accForumKarma(address _forum) public view returns (uint256) {
+      uint256 numUsers = forums[_forum].userCount +1;
+      uint256 accKarma = 0;
+      for(uint256 i = 0; i<numUsers; i++){
+        accKarma += forums[_forum].users[i].karma;
+      }
+      return accKarma;
+    }
+
+    function getCheckOutPrice(address _forum) public view returns (uint256 _res){
+      uint256 totKarma = accForumKarma(_forum);
+      uint256 bal = balanceOf(_forum);
+      if(totKarma == 0 || bal == 0) return 0;
+      uint256 rest = bal % totKarma;
+      uint256 res = (bal-rest)/totKarma;
+      return res;
+    }
+
+    function checkOut(address _forum) public returns (bool _succ){
+      uint256 val = getCheckOutPrice(_forum);
+      if (val == 0) return false;
+      uint256 myKey = forums[_forum].userKey[msg.sender];
+      uint256 myKarma = forums[_forum].users[myKey].karma;
+      balances[_forum] -= myKarma*val;
+      balances[msg.sender] += myKarma*val;
+      forums[_forum].users[myKey].karma = 0;
+      return true;
     }
 
     event Succ(bool success);

@@ -2,13 +2,10 @@
 var Web3 = require('web3');
 var web3 = new Web3('HTTP://127.0.0.1:7545');
 
-var savJson = require('../build/contracts/SaviourCoin.json');
 var forumJson = require('../build/contracts/Forum.json');
+//contractJson.networks[1585781614091].address; // Denna måste hårdkodas in
+var forumAddress = "0x8158AEEbEd41940ee46080daE9946804C11f9e01";
 
-var savAddress = "0x8158AEEbEd41940ee46080daE9946804C11f9e01";//contractJson.networks[1585781614091].address; // Denna måste hårdkodas in
-var forumAddress = "0x7a16873b85C63c360de636216Aa266D8E57e9E7A";
-
-var savContract = new web3.eth.Contract(savJson.abi, savAddress);
 var forumContract =  new web3.eth.Contract(forumJson.abi, forumAddress);
 
 var accounts;
@@ -19,9 +16,12 @@ async function setUp(){
 	var from = accounts[0];
 	var to = accounts[1];
 	var nobody = accounts[2];
-	//await HelloExjobb();
+  //await HelloExjobb();
 //	await transfer(from, to);
-//	await checkBal(from);
+	await checkBal(from);
+//		await forumBalOf(to);
+		//await forumBalOf(to);
+
 
 //	await createForum("GenesisForum", from);
 //  await getMembers(to);
@@ -36,12 +36,12 @@ async function getAccs(){
 }
 
 async function transfer(from, to){
-	await	savContract.methods.transfer(to, 10).send({from: from})
+	await	forumContract.methods.transfer(to, 10).send({from: from})
 	.once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
 }
 
 async function checkBal(acc){
-	await savContract.methods.balanceOf(acc).call(
+	await forumContract.methods.balanceOf(acc).call(
 	(err, result) => {console.log('\n' + result)});
 }
 
@@ -73,5 +73,6 @@ async function getForumData(fid){
 	await forumContract.methods.getForumData(fid).call(
 	(err, result) => {console.log('\n' + result.succ + '\n' + result.Forum_Name) + '\n'});
 }
+
 
 setUp();
