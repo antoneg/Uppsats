@@ -2,7 +2,7 @@
 Implements EIP20 token standard: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 .*/
 
-
+//PLAYGROUND! 
 pragma solidity ^0.5.0;
 
 import "./EIP20Interface.sol";
