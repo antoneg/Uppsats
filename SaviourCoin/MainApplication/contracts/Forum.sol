@@ -172,36 +172,33 @@ contract Forum is EIP20Interface {
       return true;
     }
 
-    function getUserData(address _userAddress) public view returns (bool succ, address _address, string memory _userinfo, uint256 _karma) {
+    function getUserByAddress(address _userAddress) public view returns (address userAddress, string memory userName, uint256 userKarma) {
         if(forums[msg.sender].owner == address(0x0)){
-          return (false, address(0x0), "You need to create a forum first", 0);
+          revert("You need to create a forum first");
         }
-        if(forums[msg.sender].userExists[_userAddress]){
+        if(!forums[msg.sender].userExists[_userAddress]){
+          revert("This user does not exists in your forum");
+        }
           uint256 uKey = forums[msg.sender].userKey[_userAddress];
           address uaddress = forums[msg.sender].users[uKey].userAddress;
           string memory uname = forums[msg.sender].users[uKey].userName;
-          uint256 karm = forums[msg.sender].users[uKey].karma;
-          return (true, uaddress, uname, karm);
-        }
-        if(!forums[msg.sender].userExists[_userAddress]){
-          return(false, address(0x0), "This user does not exists in your forum", 0);
-        }
-        return(false, address(0x0),"Something went wrong with adding a new member.", 0);
+          uint256 karma = forums[msg.sender].users[uKey].karma;
+          return ( uaddress, uname, karma);
     }
 
-    function getUserByUserCount(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
+    function getUserByIndex(uint256 _ucount) public view returns ( address userAddress, string memory userName, uint256 userKarma){
       if(forums[msg.sender].owner == address(0x0)){
-        return (false, address(0x0), "You need to create a forum first", 0);
+        revert("You need to create a forum first.");
       }
 
       if((forums[msg.sender].userCount < _ucount ) || _ucount < 0){
-        return (false, address(0x0), "This user does not exists", 0);
+        revert("User does not exists.");
       }
 
       address uaddress = forums[msg.sender].users[_ucount].userAddress;
       string memory uname = forums[msg.sender].users[_ucount].userName;
       uint256 karma = forums[msg.sender].users[_ucount].karma;
-      return (true, uaddress, uname, karma);
+      return (uaddress, uname, karma);
       }
 
 
@@ -209,7 +206,7 @@ contract Forum is EIP20Interface {
       return forums[msg.sender].userCount;
     }
 
-    function getMyInfo(address _admin) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+    function getMyDataByAddress(address _admin) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
       uint256 key = forums[_admin].userKey[msg.sender];
       string memory uname = forums[_admin].users[key].userName;
       uint256 karma = forums[_admin].users[key].karma;
@@ -217,7 +214,7 @@ contract Forum is EIP20Interface {
       return (fid, _admin, msg.sender, uname, karma);
     }
 
-    function getMyInfo(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+    function getMyDataByFid(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
       address admin = fidOwner[_fid];
       uint256 key = forums[admin].userKey[msg.sender];
       string memory uname = forums[admin].users[key].userName;

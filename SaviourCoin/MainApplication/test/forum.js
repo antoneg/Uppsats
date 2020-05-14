@@ -77,10 +77,38 @@ contract('Forum', accounts => {
     assert(uCount.toNumber() === 1);
   });
 
-  it("Forum's one and only user should be the forum itself", async () => {
-    let u = null;
-    u = await fc.getUserByUserCount(0) //user index 0
-    console.log(u);
+  it("Forum's one and only user should be the forum itself (using getUserByIndex(uint256 x))", async () => {
+    let res = null;
+    res = await fc.getUserByIndex(0); //user index 0
+    let address = res.userAddress;
+    let name = res.userName;
+    let karma = res.userKarma.toNumber();
+    assert(address === accounts[0]);
+    assert(name === "FirstForum");
+    assert(karma === 0);
+  });
+
+  it("Forum's one and only user should be the forum itself (using getUserData(address user))", async () => {
+    let res = null;
+    res = await fc.getUserByAddress(accounts[0]); //user index 0
+    let address = res.userAddress;
+    let name = res.userName;
+    let karma = res.userKarma.toNumber();
+    assert(address === accounts[0]);
+    assert(name === "FirstForum");
+    assert(karma === 0);
+  });
+
+  it('Should not be possoble to get a non-existing user (using getUserByIndex(uint256 x))', async () => {
+    let res = null;
+    let msg = '';
+    try {
+      res = await fc.getUserByIndex(1);
+    }catch(e){
+      msg = e.message;
+    }
+    console.log(msg);
+    console.log(res);
     assert(true);
   });
 
