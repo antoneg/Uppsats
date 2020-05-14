@@ -101,8 +101,7 @@ contract Forum is EIP20Interface {
       uint256 a = forums[msg.sender].fid;
       uint256 b = addressForumId[msg.sender];
       if((a != 0) && (a == b)){
-        emit CreateForum(false, "You already own a forum! ", msg.sender, _fname, forumId);
-        return(false);
+        revert("You already own a forum.");
       }
       forums[msg.sender] = forumData(msg.sender, _fname, forumId, 0);
       forums[msg.sender].users[0] = userData(msg.sender, _fname, 0);
@@ -117,25 +116,25 @@ contract Forum is EIP20Interface {
     }
 
     function getForumCount() public view returns (uint256 id){
-      return forumId;
+      return (forumId-1);
     }
 
-    function getForumData(uint256 _fid) public view returns (bool succ, address Owner, string memory Forum_Name, uint256 Forum_ID){
+    function getForumDataByFid(uint256 _fid) public view returns (address forumOwner, string memory forumName, uint256 fid){
       address owner = fidOwner[_fid];
       if(owner == address(0x0))
-        return (false, owner, "Forum does not exist. ", 0);
+        revert("Forum does not exists.");
       string memory fName = forums[owner].forumName;
       uint256 id = forums[owner].fid;
-      return(true, owner, fName, id);
+      return(owner, fName, id);
     }
 
-    function getForumData(address _owner) public view returns (bool succ, address Owner, string memory Forum_Name, uint256 Forum_ID){
+    function getForumData(address _owner) public view returns (address forumOwner, string memory forumName, uint256 fid){
       if(addressForumId[msg.sender] == 0){
-        return (false, address(0x0), "Forum does not exists. ", 0);
+        revert("Forum does not exists.");
       }
       string memory fName = forums[_owner].forumName;
       uint256 id = forums[_owner].fid;
-      return(true, _owner, fName, id);
+      return(_owner, fName, id);
     }
 
     function addUserToForum(address _userAddress, string memory _userName, uint256 _karma) public returns (bool success){
@@ -190,7 +189,7 @@ contract Forum is EIP20Interface {
         return(false, address(0x0),"Something went wrong with adding a new member.", 0);
     }
 
-    function getUserData(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
+    function getUserByUserCount(uint256 _ucount) public view returns (bool _succ, address _userAddress, string memory _userinfo, uint256 _karma){
       if(forums[msg.sender].owner == address(0x0)){
         return (false, address(0x0), "You need to create a forum first", 0);
       }

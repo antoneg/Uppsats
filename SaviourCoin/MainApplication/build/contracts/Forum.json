@@ -34122,11 +34122,12 @@
       },
       "links": {},
       "address": "0x8158AEEbEd41940ee46080daE9946804C11f9e01",
-      "transactionHash": "0xa8e674f2e9c0b1c024e8ab0f45fcb5752dcffcfcc0949a7c0d1743f85f54cfc9"
+      "transactionHash": "0x634dd858cf6658005e6e500b8e459a75912a8543a4dc3a37e3c450929d0c35d2"
     }
   },
   "schemaVersion": "3.0.23",
-  "updatedAt": "2020-05-06T15:11:40.110Z",
+  "updatedAt": "2020-05-12T19:12:48.968Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },
