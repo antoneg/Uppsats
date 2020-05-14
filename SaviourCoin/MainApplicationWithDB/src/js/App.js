@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Web3 from 'web3'
 import TruffleContract from 'truffle-contract'
-import SaviourCoin from '../../build/contracts/SaviourCoin.json'
+import Forum from '../../build/contracts/Forum.json'
 import Content from './Content'
 import 'bootstrap/dist/css/bootstrap.css'
 import equal from 'fast-deep-equal'
@@ -19,17 +19,16 @@ class App extends React.Component {
       from: '0x0',
       to: '0x0',
       balanceTo: 0,
-      balanceFrom: 0,
-      testState: false,
+      balanceFrom: 0
     }
 
-    this.transferCurrency = this.transferCurrency.bind(this)
-    this.updateUser = this.updateUser.bind(this)
+  this.transferCurrency = this.transferCurrency.bind(this)
+  this.updateUser = this.updateUser.bind(this)
 
   this.Web3 = require('web3')
   this.web3 = new Web3('HTTP://127.0.0.1:7545')
 
-  this.contractJson = require('../../build/contracts/SaviourCoin.json')
+  this.contractJson = require('../../build/contracts/Forum.json')
   this.contractAddress = this.contractJson.networks[5777].address //Osäker på om den här är hårdkodad
 
   this.contract = new this.web3.eth.Contract(this.contractJson.abi, this.contractAddress)
@@ -68,6 +67,18 @@ class App extends React.Component {
         <div>
           <h1>App.js</h1>
           <br/>
+           
+           <h1>Account 1</h1>
+           <p>Address: {this.state.to}</p>
+           <p>Balance: {this.state.balanceTo}</p><br />
+           <h1>Account 2</h1>
+           <p>Address: {this.state.from}</p>
+           <p>Balance: {this.state.balanceFrom}</p>
+
+           <a href="#" onClick={() => this.transferCurrency(this.state.from, this.state.to, 10)}><button>Transfer &gt;</button></a><br />
+           <a href="#" onClick={() => this.transferCurrency(this.state.to, this.state.from, 10)}><button>Transfer &lt;</button></a>
+
+
           <Content 
             from={this.state.from}
             to={this.state.to}

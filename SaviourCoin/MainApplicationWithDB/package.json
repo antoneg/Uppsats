@@ -1,5 +1,5 @@
 {
-  "name": "election",
+  "name": "Forum",
   "version": "1.0.0",
   "description": "",
   "main": "truffle.js",
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "webpack-dev-server --open & node server/server.js",
     "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "truffle test"
   },
   "author": "",
   "license": "ISC",
