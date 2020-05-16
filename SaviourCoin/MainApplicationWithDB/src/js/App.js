@@ -15,7 +15,7 @@ class App extends React.Component {
     super(props)
     this.state = {
       accounts: [],
-      blogs: [],
+      forums: ['Reddit', 'StackOverFlow', 'Flashback'],
       from: '0x0',
       to: '0x0',
       balanceTo: 0,
@@ -24,6 +24,7 @@ class App extends React.Component {
 
   this.transferCurrency = this.transferCurrency.bind(this)
   this.updateUser = this.updateUser.bind(this)
+  this.setup = this.setup.bind(this)
 
   this.Web3 = require('web3')
   this.web3 = new Web3('HTTP://127.0.0.1:7545')
@@ -35,9 +36,21 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.updateUser()
+    this.updateUser();
   }
  
+  setup() {
+
+    /*
+    this.contract.methods.createForum("Reddit").send({from: this.state.from, gas: 6721975})
+    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
+    */
+
+    this.contract.methods.getForumCount().call((err, id) => {
+      console.log("Count: " + id);
+    });
+  }
+
   updateUser() {
     this.web3.eth.getAccounts().then((accs) => {
       this.setState({ accounts: accs })
@@ -65,27 +78,18 @@ class App extends React.Component {
     return (
       <div>
         <div>
-          <h1>App.js</h1>
-          <br/>
-           
-           <h1>Account 1</h1>
-           <p>Address: {this.state.to}</p>
-           <p>Balance: {this.state.balanceTo}</p><br />
-           <h1>Account 2</h1>
-           <p>Address: {this.state.from}</p>
-           <p>Balance: {this.state.balanceFrom}</p>
-
-           <a href="#" onClick={() => this.transferCurrency(this.state.from, this.state.to, 10)}><button>Transfer &gt;</button></a><br />
-           <a href="#" onClick={() => this.transferCurrency(this.state.to, this.state.from, 10)}><button>Transfer &lt;</button></a>
+          
+          <p> {this.state.count} </p>
 
 
-          <Content 
-            from={this.state.from}
-            to={this.state.to}
-            balanceFrom={this.state.balanceFrom}
-            balanceTo={this.state.balanceTo}
-            blogs={this.state.blogs}
-          />
+          <ul className="list-group">
+            {this.state.forums.map(forum => {
+              return <li className="list-group-item" key={forum}>{forum}</li>
+            })}
+          </ul>
+
+          <a href="#" onClick={() => this.setup()}><button>Setup</button></a>
+
         </div>
       </div>
     )
