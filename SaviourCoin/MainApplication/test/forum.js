@@ -80,10 +80,14 @@ contract('Forum', accounts => {
   it("Forum's one and only user should be the forum itself (using getUserByIndex(uint256 x))", async () => {
     let res = null;
     res = await fc.getUserByIndex(0); //user index 0
-    let address = res.userAddress;
-    let name = res.userName;
-    let karma = res.userKarma.toNumber();
-    assert(address === accounts[0]);
+    let address = res.usrAddress;
+    let name = res.usrName;
+    let karma = res.usrKarma.toNumber();
+    console.log(address);
+    console.log(accounts[0]);
+    console.log(name);
+    console.log(karma);
+    assert(address == accounts[0]);
     assert(name === "FirstForum");
     assert(karma === 0);
   });
@@ -91,9 +95,9 @@ contract('Forum', accounts => {
   it("Forum's one and only user should be the forum itself (using getUserData(address user))", async () => {
     let res = null;
     res = await fc.getUserByAddress(accounts[0]); //user index 0
-    let address = res.userAddress;
-    let name = res.userName;
-    let karma = res.userKarma.toNumber();
+    let address = res.usrAddress;
+    let name = res.usrName;
+    let karma = res.usrKarma.toNumber();
     assert(address === accounts[0]);
     assert(name === "FirstForum");
     assert(karma === 0);
@@ -107,8 +111,8 @@ contract('Forum', accounts => {
     }catch(e){
       msg = e.message;
     }
-    console.log(msg);
-    console.log(res);
+    //console.log(msg);
+    //console.log(res);
     assert(true);
   });
 
