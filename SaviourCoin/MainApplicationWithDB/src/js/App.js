@@ -15,16 +15,18 @@ class App extends React.Component {
     super(props)
     this.state = {
       accounts: [],
-      forums: ['Reddit', 'StackOverFlow', 'Flashback'],
+      forums: [],
       from: '0x0',
       to: '0x0',
       balanceTo: 0,
-      balanceFrom: 0
+      balanceFrom: 0,
+      forumName: ''
     }
 
   this.transferCurrency = this.transferCurrency.bind(this)
   this.updateUser = this.updateUser.bind(this)
   this.setup = this.setup.bind(this)
+  this.createForum = this.createForum.bind(this)
 
   this.Web3 = require('web3')
   this.web3 = new Web3('HTTP://127.0.0.1:7545')
@@ -40,15 +42,24 @@ class App extends React.Component {
   }
  
   setup() {
-
+    
     /*
-    this.contract.methods.createForum("Reddit").send({from: this.state.from, gas: 6721975})
+    this.contract.methods.getMyForums().call((err, myForums) => {
+      console.log("Error: " + err);
+      console.log("Forum: " + myForums[0]);
+    });*/
+
+    this.contract.methods.getMyForums().send({from: this.state.from, gas: 6721975})
+    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
+    
+    /*
+    this.contract.methods.createForum("Stackoverflow").send({from: this.state.from, gas: 6721975})
     .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
     */
-
+    /*
     this.contract.methods.getForumCount().call((err, id) => {
       console.log("Count: " + id);
-    });
+    });*/
   }
 
   updateUser() {
@@ -74,6 +85,15 @@ class App extends React.Component {
     this.updateUser()
   }
 
+  createForum() {
+    if (this.forumName == '') {
+      console.log("You must enter a Forum name")
+    } else {
+    this.contract.methods.createForum(name).send({from: this.state.from, gas: 6721975})
+    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
+    }
+  }
+
   render() {
     return (
       <div>
@@ -89,6 +109,19 @@ class App extends React.Component {
           </ul>
 
           <a href="#" onClick={() => this.setup()}><button>Setup</button></a>
+
+
+
+
+          <div className="container register-form">
+            <form onSubmit={this.createForum}>
+                <label>Forum name</label>
+                <input type="text" className="form-control" onChange={name => this.setState({forumName: name})}/>
+                <div className="submit-section">
+                    <button className="btn btn-uth-submit">Create</button>
+                </div>
+            </form>
+          </div>
 
         </div>
       </div>
