@@ -74,5 +74,6 @@ async function getForumData(fid){
 	(err, result) => {console.log('\n' + result.succ + '\n' + result.Forum_Name) + '\n'});
 }
 
+}
 
 setUp();
