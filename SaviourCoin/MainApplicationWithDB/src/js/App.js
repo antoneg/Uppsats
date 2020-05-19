@@ -9,6 +9,8 @@ import {
 
 import Home from './Home';
 import Login from './Login';
+import CreateAccount from './CreateAccount';
+import MyForum from './MyForum';
 
 class App extends Component {
   render() {
@@ -16,7 +18,9 @@ class App extends Component {
       <main>
         <Switch>
           <Route exact path="/"  component={Login}/>
+          <Route path="/CreateAccount" component={CreateAccount} />
           <Route path="/Home" component={Home} />
+          <Route path="/MyForum" component={MyForum} />
         </Switch>
       </main>
     );
