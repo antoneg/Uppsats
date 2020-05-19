@@ -26,7 +26,7 @@ class Login extends Component {
     this.state = {
       username: '',
       password: '',
-      errorMsg: '',
+      msg: '',
       data: ''
     }
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -34,32 +34,37 @@ class Login extends Component {
 
   handleSubmit(event) {
     event.preventDefault()
-    var data = {
-        username: this.state.username,
-        password: this.state.password
-    }
-  
-    let currentComponent = this;
-
-    fetch("http://localhost:3000/users/auth", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-    }).then(function(response) {
-        if (response.status >= 400) {
-          throw new Error("Bad response from server");
+    if(this.state.username && this.state.password) {
+        var data = {
+            username: this.state.username,
+            password: this.state.password
         }
-        return response.json();
-    }).then(function(data) {
-            if(data.error) {
-                currentComponent.setState({ errorMsg: data.error });
-                console.log(data.error);
-            } else {
-                currentComponent.setState({ data: data});
+      
+        let currentComponent = this;
+
+        fetch("http://localhost:3000/users/auth", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        }).then(response => {
+            if (response.status >= 400) {
+              throw new Error("Bad response from server");
             }
-    }).catch(function(error) {
-        console.log(error);
-    });
+            return response.json();
+        }).then(obj => {
+            console.log(obj);
+            if(obj.error) {
+                currentComponent.setState({ msg: obj.error });
+                console.log(obj.error);
+            } else {
+                currentComponent.setState({ data: obj});
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
+    } else {
+        this.setState({msg: "Please enter username and password."});
+    }
   }
 
   logChange(e, key) {
@@ -68,20 +73,21 @@ class Login extends Component {
 
   render() {
     return (
-        <div>
+        <div className="container">
+            <h1>Login</h1>
           <div className="container register-form">
             <form onSubmit={this.handleSubmit} method="POST">
                 <label>Username</label>
                 <input type="text" className="form-control" onChange={e => this.logChange(e, "username")}/>
                 <label>Password</label>
-                <input type="text" className="form-control" onChange={e => this.logChange(e, "password")}/>
+                <input type="password" className="form-control" onChange={e => this.logChange(e, "password")}/>
                 <div className="submit-section">
                     <button className="btn btn-uth-submit">Submit</button>
                 </div>
             </form>
           </div>
 
-          <p>{this.state.errorMsg}</p>
+          <p>{this.state.msg}</p>
 
           <Link to="CreateAccount">Create Account</Link>
 
