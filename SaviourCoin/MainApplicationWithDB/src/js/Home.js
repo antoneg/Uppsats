@@ -5,7 +5,9 @@ import TruffleContract from 'truffle-contract'
 import Forum from '../../build/contracts/Forum.json'
 import Content from './Content'
 import 'bootstrap/dist/css/bootstrap.css'
+//import '../css/reactfix.css'
 import equal from 'fast-deep-equal'
+import {Link} from "react-router-dom";
 
 class Home extends React.Component {
   constructor(props) {
@@ -17,42 +19,32 @@ class Home extends React.Component {
       to: '0x0',
       balanceTo: 0,
       balanceFrom: 0,
-      forumName: ''
+      balance: 0,
+      forumName: '',
+      data: ''
     }
 
   this.transferCurrency = this.transferCurrency.bind(this)
   this.updateUser = this.updateUser.bind(this)
   this.setup = this.setup.bind(this)
+  this.tempSetup = this.tempSetup.bind(this)
   this.createForum = this.createForum.bind(this)
 
   this.Web3 = require('web3')
   this.web3 = new Web3('HTTP://127.0.0.1:7545')
 
-  /*
-  this.web3 = new Web3(new Web3.providers.HttpProvider(
-  	'HTTP://127.0.0.1:7545',
-  	{
-  		headers: [{
-  			name:'Access-Control-Allow-Origin',
-  			value: 'HTTP://127.0.0.1:7545'
-  		}]
-  	}
-
-  	))
-  	*/
-
   this.contractJson = require('../../build/contracts/Forum.json')
-  this.contractAddress = this.contractJson.networks[5777].address //Osäker på om den här är hårdkodad
+  this.contractAddress = this.contractJson.networks[5777].address
 
   this.contract = new this.web3.eth.Contract(this.contractJson.abi, this.contractAddress)
   }
 
   componentDidMount() {
     this.updateUser();
+    //setup should be called here instead
   }
- 
-  setup() {
-    /*
+
+  tempSetup() {
     this.contract.methods.createForum("Reddit").send({from: this.state.from, gas: 6721975})
     .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
 
@@ -61,7 +53,10 @@ class Home extends React.Component {
 
     this.contract.methods.addUserToForum(this.state.from, "user", 100).send({from: this.state.to, gas: 6721975})
     .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
-    */
+  }
+ 
+  setup() {
+    
     /*
     this.contract.methods.getMyForums().call((err, myForums) => {
       console.log("Error: " + err);
@@ -79,17 +74,15 @@ class Home extends React.Component {
     */
     
     this.contract.methods.getForumCount().call({gas: 6721975}, (err, id) => {
-    	console.log('error: ' + err);
-      console.log('ids: ' + id);
       var i;
       for(i = 1; i <= id; i++) {
-        this.contract.methods.getMemberStatus(i).call((err, obj) => {
+        this.contract.methods.getMemberStatus(i).call({from: this.props.location.state.data[0].address}, (err, obj) => {
           //console.log(obj.success)
           if(obj.success) {
             //obj._fID
             this.contract.methods.getMyInfoByFid(obj._fID).call((err, result)=> {
               
-              console.log(result)
+              //console.log(result)
 
               this.setState(prevState => ({
                 forums: [...prevState.forums, result]
@@ -101,7 +94,12 @@ class Home extends React.Component {
       }
     });
     
-    console.log(this.state.forums)
+    this.contract.methods.balanceOf(this.props.location.state.data[0].address).call((err, result) => {
+      this.setState({ balance: result })
+    })
+
+    //console.log(this.state.forums)
+    
   }
 
   updateUser() {
@@ -117,6 +115,8 @@ class Home extends React.Component {
       this.contract.methods.balanceOf(this.state.from).call( (err, result) => {
         this.setState({ balanceFrom: result })
       })
+
+      this.setup();
   })
   }
 
@@ -129,7 +129,6 @@ class Home extends React.Component {
 
   createForum(event) {
     event.preventDefault()
-    console.log("Forum Name: " + this.state.forumName)
     if (this.forumName == '') {
       console.log("You must enter a Forum name")
     } else {
@@ -144,30 +143,38 @@ class Home extends React.Component {
 
   render() {
   	return(
-      <div>
-        <div>
+      <div className="container-fluid">
+        <div className="row">
 
-          <ul className="list-group">
-            {this.state.forums.map(forum => {
-              return <li className="list-group-item" key={forum._fID}>
-                <h1>{forum._forumName}</h1> <br></br>
-                <p>Karma: {forum._karma}</p> <br></br>
-                <p>Checkout Price: {forum._checkOutPrice}</p>
-              </li>
-            })}
-          </ul>
+          <div className="col-4">
+            <div>
+              <p>Username: {this.props.location.state.data[0].username}</p>
+              <p>Address: {this.props.location.state.data[0].address}</p>
+              <p>Balance: {this.state.balance}</p>
+            </div>
+          </div>
 
-          <a href="#" onClick={() => this.setup()}><button>Setup</button></a>
+          <div className="col-4">
+            <ul className="list-group">
+              {this.state.forums.map(forum => {
+                return <li className="list-group-item" key={forum._fID}>
+                  <h1>{forum._forumName}</h1> <br></br>
+                  <p>Karma: {forum._karma}</p> <br></br>
+                  <p>Checkout Price: {forum._checkOutPrice}</p>
+                </li>
+              })}
+            </ul>
+            <a href="#" onClick={() => this.tempSetup()}><button>Setup</button></a>
+          </div>
 
-
-          <div className="container register-form">
-            <form onSubmit={this.createForum}>
-                <label>Forum name</label>
-                <input type="text" className="form-control" onChange={e => this.logChange(e, "forumName")}/>
-                <div className="submit-section">
-                    <button className="btn btn-uth-submit">Create</button>
-                </div>
-            </form>
+          <div className="col-4">
+            <Link to={{
+              pathname:'MyForum',
+              data: {
+                user: this.props.location.state.data[0],
+                methods: this.contract.methods
+              }
+            }}> MyForum </Link>
           </div>
 
         </div>
