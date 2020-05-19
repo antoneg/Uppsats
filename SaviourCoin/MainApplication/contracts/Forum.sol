@@ -219,7 +219,7 @@ contract Forum is EIP20Interface {
       return (fid, _admin, msg.sender, uname, karma);
     }
 
-    function getMyInfoByFid(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+    function getMyInfoByFid(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma, uint256 _cop, string memory _forumName) {
       address admin = fidOwner[_fid];
       bool exists = forums[admin].userExists[msg.sender];
       if(!exists)
@@ -228,12 +228,14 @@ contract Forum is EIP20Interface {
       string memory uname = forums[admin].users[key].userName;
       uint256 karma = forums[admin].users[key].karma;
       uint256 fid = forums[admin].fid;
-      return (fid, admin, msg.sender, uname, karma);
+      uint256 cop = forums[admin].cop;
+      string memory fname = forums[admin].forumName;
+      return (fid, admin, msg.sender, uname, karma, cop, fname);
     }
 
-    function getMemberStatus(uint256 _fid) public view returns (bool success){
+    function getMemberStatus(uint256 _fid) public view returns (uint256 _fID, bool success){
       address admin = fidOwner[_fid];
-      return forums[admin].userExists[msg.sender];
+      return (_fid, forums[admin].userExists[msg.sender]);
     }
 
     function accForumKarma(address _forum) public view returns (uint256) {

@@ -12,11 +12,13 @@ class MyForum extends React.Component {
       username: '',
       balance: '',
       ownsForum: false,
-      addUserError: ''
+      addUserError: '',
+      cashOutPrice: '',
+      setCashOutError: ''
     }
 
-    this.createForum = this.createForum.bind(this);
     this.setup = this.setup.bind(this);
+    this.setCashOutPrice = this.setCashOutPrice.bind(this);
     this.addUser = this.addUser.bind(this);
     this.createForum = this.createForum.bind(this);
   }
@@ -27,17 +29,44 @@ class MyForum extends React.Component {
  
   setup() {
     this.props.location.data.methods.getForumData(this.props.location.data.user.address).call((error, result) => {
+      console.log(error);
+      console.log(result);
       if(error || !result.forumName) {
         this.setState({ownsForum: false});
       } else {
         this.setState({ownsForum: true});
-        this.setState({ forumName: result.forumName });
+        this.setState({
+          forumName: result.forumName,
+          cashOutPrice: result.cop
+        });
       }
     })
 
     this.props.location.data.methods.balanceOf(this.props.location.data.user.address).call((err, result) => {
       this.setState({ balance: result })
     })
+  }
+
+  setCashOutPrice(event) {
+    event.preventDefault();
+    if (this.state.price) {
+      this.props.location.data.methods.setCashOutPrice(this.state.price)
+        .send({from: this.props.location.data.user.address, gas: 6721975}, (error, result) => {
+          console.log(result);
+        if (error) {
+          console.log('fail');
+          this.setState({setCashOutError: "To high. Aquire more scones or try a lower COP."});
+        } else {
+          console.log('success');
+          this.setState({
+            cashOutPrice: this.state.price,
+            setCashOutError: ""
+          });
+        }
+      })
+    } else {
+      console.log("You must enter a price");
+    }
   }
 
   addUser(event) {
@@ -74,12 +103,13 @@ class MyForum extends React.Component {
     event.preventDefault();
     if (this.state.forumName) {
       this.props.location.data.methods.createForum(this.state.forumName)
-        .send({from: this.props.location.data.user.address, gas: 6721975}, (error, receipt) => {
-        if (receipt) {
-          console.log('success')
+        .send({from: this.props.location.data.user.address, gas: 6721975}, (error, result) => {
+          console.log(error);
+        if (result) {
+          console.log('success');
           this.setState({ownsForum: true});
         } else {
-          console.log('fail')
+          console.log('fail');
         }
       })
     } else {
@@ -97,6 +127,21 @@ class MyForum extends React.Component {
         <div className="container">
           <h1>{this.state.forumName}</h1>
           <p>Balance: {this.state.balance}</p>
+          <p>Cash Out Price: {this.state.cashOutPrice}</p>
+
+
+          <h3>Set Cash Out Price</h3>
+          <div className="container register-form">
+            <form onSubmit={this.setCashOutPrice}>
+                <label>Price in scones/karma</label>
+                <input type="text" className="form-control" value={this.state.price} onChange={e => this.logChange(e, "price")}/>
+                <p>{this.state.setCashOutError}</p>
+                <div className="submit-section">
+                    <button className="btn btn-uth-submit">Set</button>
+                </div>
+            </form>
+          </div>
+
           <h3>Add user</h3>
           <div className="container register-form">
             <form onSubmit={this.addUser}>
@@ -106,7 +151,7 @@ class MyForum extends React.Component {
                 <input type="text" className="form-control" value={this.state.address} onChange={e => this.logChange(e, "address")}/>
                 <p>{this.state.addUserError}</p>
                 <div className="submit-section">
-                    <button className="btn btn-uth-submit">Create</button>
+                    <button className="btn btn-uth-submit">Add user</button>
                 </div>
             </form>
           </div>

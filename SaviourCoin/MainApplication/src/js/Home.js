@@ -1,17 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import Web3 from 'web3'
-import TruffleContract from 'truffle-contract'
-import Forum from '../../build/contracts/Forum.json'
-import Content from './Content'
-import 'bootstrap/dist/css/bootstrap.css'
-//import '../css/reactfix.css'
-import equal from 'fast-deep-equal'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Web3 from 'web3';
+import TruffleContract from 'truffle-contract';
+import Forum from '../../build/contracts/Forum.json';
+import 'bootstrap/dist/css/bootstrap.css';
+//import '../css/reactfix.css';
+import equal from 'fast-deep-equal';
 import {Link} from "react-router-dom";
 
 class Home extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       accounts: [],
       forums: [],
@@ -21,19 +20,17 @@ class Home extends React.Component {
       msg: "You are currently not a member of any forum."
     }
 
-  this.transferCurrency = this.transferCurrency.bind(this)
-  this.updateUser = this.updateUser.bind(this)
-  this.setup = this.setup.bind(this)
-  this.tempSetup = this.tempSetup.bind(this)
-  this.createForum = this.createForum.bind(this)
+  this.updateUser = this.updateUser.bind(this);
+  this.setup = this.setup.bind(this);
+  this.cashOut = this.cashOut.bind(this);
 
-  this.Web3 = require('web3')
-  this.web3 = new Web3('HTTP://127.0.0.1:7545')
+  this.Web3 = require('web3');
+  this.web3 = new Web3('HTTP://127.0.0.1:7545');
 
-  this.contractJson = require('../../build/contracts/Forum.json')
-  this.contractAddress = this.contractJson.networks[5777].address
+  this.contractJson = require('../../build/contracts/Forum.json');
+  this.contractAddress = this.contractJson.networks[5777].address;
 
-  this.contract = new this.web3.eth.Contract(this.contractJson.abi, this.contractAddress)
+  this.contract = new this.web3.eth.Contract(this.contractJson.abi, this.contractAddress);
   }
 
   componentDidMount() {
@@ -48,7 +45,7 @@ class Home extends React.Component {
     this.contract.methods.createForum("Stackoverflow").send({from: this.state.to, gas: 6721975})
     .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
 
-    this.contract.methods.addUserToForum(this.state.from, "user", 100).send({from: this.state.to, gas: 6721975})
+    this.contract.methods.addUserToForum(this.state.from, "user", 10).send({from: this.state.to, gas: 6721975})
     .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
   }
  
@@ -57,9 +54,12 @@ class Home extends React.Component {
       var i;
       for(i = 1; i <= id; i++) {
         this.contract.methods.getMemberStatus(i).call({from: this.props.location.state.data[0].address}, (err, obj) => {
+          //console.log(obj)
           if(obj.success) {
             this.setState({msg: ''});
-            this.contract.methods.getMyInfoByFid(obj._fID).call((err, result)=> {
+            this.contract.methods.getMyInfoByFid(obj._fID).call({from: this.props.location.state.data[0].address}, (error, result)=> {
+              //console.log(error);
+              //console.log(result);
               this.setState(prevState => ({
                 forums: [...prevState.forums, result]
               }))
@@ -72,7 +72,6 @@ class Home extends React.Component {
     this.contract.methods.balanceOf(this.props.location.state.data[0].address).call((err, result) => {
       this.setState({ balance: result })
     })
-    
   }
 
   updateUser() {
@@ -90,24 +89,19 @@ class Home extends React.Component {
       })
 
       this.setup();
-  })
+    })
   }
 
-  transferCurrency(to, from, value) {
-    this.contract.methods.transfer(to, value).send({from: from})
-    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
-
-    this.updateUser()
-  }
-
-  createForum(event) {
-    event.preventDefault()
-    if (this.forumName == '') {
-      console.log("You must enter a Forum name")
-    } else {
-    this.contract.methods.createForum(this.state.forumName).send({from: this.state.from, gas: 6721975})
-    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
-    }
+  cashOut(forumAddress) {
+    this.contract.methods.cashOut(forumAddress)
+      .send({from: this.props.location.state.data[0].address, gas: 6721975}, (error, result) => {
+          console.log(error);
+        if (result) {
+          console.log('success');
+        } else {
+          console.log('fail');
+        }
+      })
   }
 
   logChange(e, key) {
@@ -134,8 +128,8 @@ class Home extends React.Component {
                 return <li className="list-group-item" key={forum._fID}>
                   <h1>{forum._forumName}</h1> <br></br>
                   <p>Karma: {forum._karma}</p> <br></br>
-                  <p>Cashout Price: {forum._checkOutPrice}</p><br></br>
-                  <button>Cashout</button>
+                  <p>Cash Out Price: {forum._cop}</p><br></br>
+                  <button onClick={() => this.cashOut(forum._forumAddress)}>Cashout</button>
                 </li>
               })}
             </ul>
