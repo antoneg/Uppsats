@@ -10,6 +10,7 @@ class MyForum extends React.Component {
       forumName: '',
       address: '',
       username: '',
+      balance: '',
       ownsForum: false,
       addUserError: ''
     }
@@ -25,11 +26,7 @@ class MyForum extends React.Component {
   }
  
   setup() {
-    console.log(this.props.location.data.user.address);
     this.props.location.data.methods.getForumData(this.props.location.data.user.address).call((error, result) => {
-      console.log(error);
-      console.log(result);
-
       if(error || !result.forumName) {
         this.setState({ownsForum: false});
       } else {
@@ -37,32 +34,37 @@ class MyForum extends React.Component {
         this.setState({ forumName: result.forumName });
       }
     })
+
+    this.props.location.data.methods.balanceOf(this.props.location.data.user.address).call((err, result) => {
+      this.setState({ balance: result })
+    })
   }
 
   addUser(event) {
     event.preventDefault()
     if (this.state.address && this.state.username) {
       try{
+        this.props.location.data.methods.addUserToForum(this.state.address, this.state.username, 100)
+          .send({from: this.props.location.data.user.address, gas: 6721975}, (error, result) => {
+            console.log(error);
+            console.log(result);
 
-      this.props.location.data.methods.addUserToForum(this.state.address, this.state.username, 100)
-        .send({from: this.props.location.data.user.address, gas: 6721975}, (success) => {
-
-        if(success) {
-          this.setState({ addUserError: "User was added" });
-          console.log("User was added");
-          this.setState({address: ''});
-          this.setState({username: ''});
-        } else {
-          this.setState({ addUserError: "User could not be added" });
-          console.log("Error: User could not be added")
-        }
-      })
+          if(result) {
+            this.setState({ 
+              addUserError: "User was added",
+              address: '',
+              username: ''
+            });
+            console.log("User was added");
+          } else {
+            this.setState({ addUserError: "User could not be added (Else)" });
+            console.log("Error: User could not be added (Else)")
+          }
+        })
       } catch (e) {
         console.log(e);
-        this.setState({ addUserError: "User could not be added" });
+        this.setState({ addUserError: "The user does not exist" });
       }
-
-
     } else {
       this.setState({ addUserError: "You must enter an address and a username" });
     }
@@ -73,8 +75,6 @@ class MyForum extends React.Component {
     if (this.state.forumName) {
       this.props.location.data.methods.createForum(this.state.forumName)
         .send({from: this.props.location.data.user.address, gas: 6721975}, (error, receipt) => {
-          console.log("Error: " + error)
-          console.log(receipt);
         if (receipt) {
           console.log('success')
           this.setState({ownsForum: true});
@@ -96,14 +96,14 @@ class MyForum extends React.Component {
     	return(
         <div className="container">
           <h1>{this.state.forumName}</h1>
-          <p>Info goes here</p>
+          <p>Balance: {this.state.balance}</p>
           <h3>Add user</h3>
           <div className="container register-form">
             <form onSubmit={this.addUser}>
                 <label>Username</label>
-                <input type="text" className="form-control" onChange={e => this.logChange(e, "username")}/>
+                <input type="text" className="form-control" value={this.state.username} onChange={e => this.logChange(e, "username")}/>
                 <label>User Address</label>
-                <input type="text" className="form-control" onChange={e => this.logChange(e, "address")}/>
+                <input type="text" className="form-control" value={this.state.address} onChange={e => this.logChange(e, "address")}/>
                 <p>{this.state.addUserError}</p>
                 <div className="submit-section">
                     <button className="btn btn-uth-submit">Create</button>

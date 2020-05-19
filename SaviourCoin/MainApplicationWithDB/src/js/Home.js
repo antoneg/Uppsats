@@ -15,13 +15,10 @@ class Home extends React.Component {
     this.state = {
       accounts: [],
       forums: [],
-      from: '0x0',
-      to: '0x0',
-      balanceTo: 0,
-      balanceFrom: 0,
       balance: 0,
       forumName: '',
-      data: ''
+      data: '',
+      msg: "You are currently not a member of any forum."
     }
 
   this.transferCurrency = this.transferCurrency.bind(this)
@@ -41,7 +38,7 @@ class Home extends React.Component {
 
   componentDidMount() {
     this.updateUser();
-    //setup should be called here instead
+    //setup should be called here instead. Can call updateUser in setup instead.
   }
 
   tempSetup() {
@@ -56,38 +53,16 @@ class Home extends React.Component {
   }
  
   setup() {
-    
-    /*
-    this.contract.methods.getMyForums().call((err, myForums) => {
-      console.log("Error: " + err);
-      console.log("Forum: " + myForums[0]);
-    });*/
-
-    /*
-    this.contract.methods.getMyForums().send({from: this.state.from, gas: 6721975})
-    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
-    */
-    
-    /*
-    this.contract.methods.createForum("Stackoverflow").send({from: this.state.from, gas: 6721975})
-    .once('receipt', (receipt) => {console.log('\n' + "Transaction successfull!")});
-    */
-    
     this.contract.methods.getForumCount().call({gas: 6721975}, (err, id) => {
       var i;
       for(i = 1; i <= id; i++) {
         this.contract.methods.getMemberStatus(i).call({from: this.props.location.state.data[0].address}, (err, obj) => {
-          //console.log(obj.success)
           if(obj.success) {
-            //obj._fID
+            this.setState({msg: ''});
             this.contract.methods.getMyInfoByFid(obj._fID).call((err, result)=> {
-              
-              //console.log(result)
-
               this.setState(prevState => ({
                 forums: [...prevState.forums, result]
               }))
-              
             })
           }
         })
@@ -97,8 +72,6 @@ class Home extends React.Component {
     this.contract.methods.balanceOf(this.props.location.state.data[0].address).call((err, result) => {
       this.setState({ balance: result })
     })
-
-    //console.log(this.state.forums)
     
   }
 
@@ -155,16 +128,17 @@ class Home extends React.Component {
           </div>
 
           <div className="col-4">
+            <p>{this.state.msg}</p>
             <ul className="list-group">
               {this.state.forums.map(forum => {
                 return <li className="list-group-item" key={forum._fID}>
                   <h1>{forum._forumName}</h1> <br></br>
                   <p>Karma: {forum._karma}</p> <br></br>
-                  <p>Checkout Price: {forum._checkOutPrice}</p>
+                  <p>Cashout Price: {forum._checkOutPrice}</p><br></br>
+                  <button>Cashout</button>
                 </li>
               })}
             </ul>
-            <a href="#" onClick={() => this.tempSetup()}><button>Setup</button></a>
           </div>
 
           <div className="col-4">
