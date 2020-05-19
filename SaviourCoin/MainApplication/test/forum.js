@@ -128,7 +128,7 @@ contract('Forum', accounts => {
     }catch(e){
       msg = e.message;
     }
-    assert(msg.includes('This user does not exists.'));
+    assert(msg.includes('This user does not exist.'));
   });
 
   it('Should not be possoble to get a non-existing user (using getUserByAddress(address a))', async () => {
@@ -139,7 +139,7 @@ contract('Forum', accounts => {
     }catch(e){
       msg = e.message;
     }
-    assert(msg.includes('This user does not exists.'));
+    assert(msg.includes('This user does not exist.'));
   });
 
 
@@ -173,7 +173,7 @@ contract('Forum', accounts => {
     }catch(e){
       msg = e.message;
     }
-    assert(msg.includes('Forum does not exists.'));
+    assert(msg.includes('Forum does not exist.'));
   });
 
   it('User 0 should be able to add user 1 to F1', async () => {
@@ -375,7 +375,7 @@ contract('Forum', accounts => {
     }catch(e){
       msg = e.message;
     }
-    assert(msg.includes("This user does not exists."))
+    assert(msg.includes("This user does not exist."))
   });
 
   it('Acting as user 3, one should get user data from F1 (using getMyInfoByFid(uint256 x))', async () => {
@@ -679,8 +679,6 @@ contract('Forum', accounts => {
   });
 
   it('The rest of all users in F1 (except 0) should be able to cash out', async () => {
-    let fd = null;
-    let res = null;
     let ud = null;
     let bal = null;
     let cop = 0;

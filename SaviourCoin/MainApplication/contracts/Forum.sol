@@ -93,9 +93,6 @@ contract Forum is EIP20Interface {
 
 
 
-
-
-
     // Forum functions...
 
     function createForum(string memory _fname) public returns (bool success){
@@ -122,7 +119,7 @@ contract Forum is EIP20Interface {
     function getForumDataByFid(uint256 _fid) public view returns (address forumOwner, string memory forumName, uint256 fid, uint256 cop){
       address owner = fidOwner[_fid];
       if(owner == address(0x0))
-        revert("Forum does not exists.");
+        revert("Forum does not exist.");
       string memory fName = forums[owner].forumName;
       uint256 id = forums[owner].fid;
       uint256 fcop = forums[owner].cop;
@@ -131,7 +128,7 @@ contract Forum is EIP20Interface {
 
     function getForumData(address _owner) public view returns (address forumOwner, string memory forumName, uint256 fid, uint256 cop){
       if(addressForumId[msg.sender] == 0){
-        revert("Forum does not exists.");
+        revert("Forum does not exist.");
       }
       string memory fName = forums[_owner].forumName;
       uint256 id = forums[_owner].fid;
@@ -184,7 +181,7 @@ contract Forum is EIP20Interface {
           revert("You need to create a forum first.");
         }
         if(!forums[msg.sender].userExists[_userAddress]){
-          revert("This user does not exists.");
+          revert("This user does not exist.");
         }
         uint256 uKey = forums[msg.sender].userKey[_userAddress];
         address uaddress = forums[msg.sender].users[uKey].userAddress;
@@ -199,7 +196,7 @@ contract Forum is EIP20Interface {
       }
 
       if(forums[msg.sender].users[_ucount].userAddress == address(0x0)){
-        revert("This user does not exists.");
+        revert("This user does not exist.");
       }
       address uaddress = forums[msg.sender].users[_ucount].userAddress;
       string memory uname = forums[msg.sender].users[_ucount].userName;
