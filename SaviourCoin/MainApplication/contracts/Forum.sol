@@ -31,7 +31,7 @@ contract Forum is EIP20Interface {
       uint256 userCount;
       uint256 cor;
       mapping(uint256 => userData) users;
-      mapping(address => uint256) userKey;
+      mapping(address => uint256) userKey; //Equal to next userCount.
       mapping(address => bool) userExists;
     }
 
@@ -55,7 +55,7 @@ contract Forum is EIP20Interface {
         forumId = 1;
     }
 
-    // EIP20Interface functions...
+    // Coin functions...
     function transfer(address _to, uint256 _value) public returns (bool success) {
         require(balances[msg.sender] >= _value);
         balances[msg.sender] -= _value;
@@ -89,7 +89,7 @@ contract Forum is EIP20Interface {
     function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
-    // .. end of EIP20Interface functions
+    // .. end of coin functions
 
 
 
