@@ -2,24 +2,6 @@ import React, {Component} from 'react';
 import {Link} from "react-router-dom";
 import {useHistory} from "react-router-dom";
 
-  //Allows us to use hooks on data from class.
-  //Will generate a warning which can be ignored.
-  const HistoryHook = (props) => {
-      if(props.data) {
-          const history = useHistory();
-          history.push({
-              pathname: '/Home',
-              state: {data: props.data}
-          });
-      }
-
-      return(
-      <div>
-          <p></p>
-      </div>
-      );
-  };
-
 class Login extends Component {
     constructor(props) {
     super(props);
@@ -29,11 +11,12 @@ class Login extends Component {
       msg: '',
       data: ''
     }
+
     this.handleSubmit = this.handleSubmit.bind(this);
-     }
+  }
 
   handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
     if(this.state.username && this.state.password) {
         var data = {
             username: this.state.username,
@@ -52,7 +35,6 @@ class Login extends Component {
             }
             return response.json();
         }).then(obj => {
-            console.log(obj);
             if(obj.error) {
                 currentComponent.setState({ msg: obj.error });
                 console.log(obj.error);
@@ -97,5 +79,24 @@ class Login extends Component {
     );
   }
 }
+
+/*
+Allows us to use hooks on data from class.
+Will generate a warning which can be ignored.
+*/
+const HistoryHook = (props) => {
+    if(props.data) {
+        const history = useHistory();
+        history.push({
+            pathname: '/Home',
+            state: {data: props.data}
+        });
+    }
+
+    return(
+    <div>
+    </div>
+    );
+};
 
 export default Login;

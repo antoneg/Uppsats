@@ -9,9 +9,9 @@ var mysqlConnection = mysql.createConnection({
 
 mysqlConnection.connect((err)=>{
 	if(!err) {
-		console.log("Connected");
+		console.log("Connected to ForumDB");
 	} else {
-		console.log("Connection Failed");
+		console.log("Connection to ForumDB Failed");
 	}
 });
 

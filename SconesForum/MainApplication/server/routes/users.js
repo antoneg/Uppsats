@@ -1,7 +1,6 @@
 const express = require("express");
 const Router = express.Router();
-const mysqlConnection = require("../connection")
-
+const mysqlConnection = require("../connection");
 
 Router.post('/new', function(request, response, next) {
 	if (request.body.username && request.body.address && request.body.password) {
@@ -19,7 +18,6 @@ Router.post('/new', function(request, response, next) {
 	}
 });
 
-
 Router.post('/auth', function(request, response) {
 	if (request.body.username && request.body.password) {
 		mysqlConnection.query('SELECT * FROM users WHERE username = ? AND password = MD5(?);', 
@@ -33,7 +31,6 @@ Router.post('/auth', function(request, response) {
 	} else {
 		response.send(JSON.parse('{"error":"You have not entered username, address and password."}'));
 	}
-
 });
 
 Router.get("/", (req, res) => {

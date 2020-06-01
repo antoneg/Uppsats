@@ -3,18 +3,19 @@ import {Link} from "react-router-dom";
 
 class CreateAccount extends Component {
 		constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       username: '',
       address: '',
       password: '',
       msg: ''
     }
-    this.handleSubmit = this.handleSubmit.bind(this)
+
+    this.handleSubmit = this.handleSubmit.bind(this);
  	}
 
   handleSubmit(event) {
-        event.preventDefault()
+        event.preventDefault();
         if(this.state.username && this.state.address && this.state.password) {
 	        var data = {
 	            username: this.state.username,
@@ -36,7 +37,7 @@ class CreateAccount extends Component {
 	            	if (obj.code == 'ER_DUP_ENTRY') {
 	            		this.setState({msg: "A user with that username or address already exists."});
 	            	} else {
-	            		this.setState({msg: "Unkown database error."});
+	            		this.setState({msg: "Unknown database error."});
 	            	}
 	            } else  {
 	              this.setState({msg: "Thank you for registering!"});
