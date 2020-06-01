@@ -29,7 +29,7 @@ contract Forum is EIP20Interface {
       string forumName;
       uint256 fid;
       uint256 userCount;
-      uint256 cop;
+      uint256 cor;
       mapping(uint256 => userData) users;
       mapping(address => uint256) userKey; //Equal to next userCount.
       mapping(address => bool) userExists;
@@ -116,39 +116,55 @@ contract Forum is EIP20Interface {
       return (forumId-1);
     }
 
-    function getForumDataByFid(uint256 _fid) public view returns (address forumOwner, string memory forumName, uint256 fid, uint256 cop){
+    function getForumDataByFid(uint256 _fid) public view returns
+    (address forumOwner,
+     string memory forumName,
+     uint256 fid,
+     uint256 cor){
+
       address owner = fidOwner[_fid];
       if(owner == address(0x0))
         revert("Forum does not exist.");
       string memory fName = forums[owner].forumName;
       uint256 id = forums[owner].fid;
-      uint256 fcop = forums[owner].cop;
-      return(owner, fName, id, fcop);
+      uint256 fcor = forums[owner].cor;
+
+      return(owner, fName, id, fcor);
     }
 
-    function getForumData(address _owner) public view returns (address forumOwner, string memory forumName, uint256 fid, uint256 cop){
+    function getForumDataByAddress(address _owner) public view returns
+    (address forumOwner,
+     string memory forumName,
+     uint256 fid,
+     uint256 cor){
+
       if(addressForumId[msg.sender] == 0){
         revert("Forum does not exist.");
       }
       string memory fName = forums[_owner].forumName;
       uint256 id = forums[_owner].fid;
-      uint256 fcop = forums[_owner].cop;
-      return(_owner, fName, id, fcop);
+      uint256 fcor = forums[_owner].cor;
+      return(_owner, fName, id, fcor);
     }
+
     //Max cash out, that is if all users were to cash out.
     function getCurrentMCO() public view returns (uint256 max){
-      uint256 res = accForumKarma(msg.sender) * forums[msg.sender].cop;
+      uint256 res = accForumKarma(msg.sender) * forums[msg.sender].cor;
       return res;
     }
 
-    function addUserToForum(address _userAddress, string memory _userName, uint256 _karma) public returns (bool success){
+    function addUserToForum(address _userAddress,
+                            string memory _userName,
+                            uint256 _karma)
+    public returns (bool success){
+
       if(forums[msg.sender].owner != msg.sender){
         revert("You need to create a forum first.");
       }
       if(forums[msg.sender].userExists[_userAddress] == true){
         revert("User already exists.");
       }
-      if(( getCurrentMCO() + ( forums[msg.sender].cop * _karma)) > balanceOf(msg.sender))
+      if(( getCurrentMCO() + ( forums[msg.sender].cor * _karma)) > balanceOf(msg.sender))
         revert("User is given too much karma. Your balace might not be able to handle it."); //t
 
         uint256 newUserCount = forums[msg.sender].userCount;
@@ -160,14 +176,16 @@ contract Forum is EIP20Interface {
         return (true);
     }
 
-    function setKarma(uint256 _karma, address _userAddress) public returns (bool succ){
+    function setKarma(uint256 _karma, address _userAddress)
+    public returns (bool success){
+
       if(forums[msg.sender].owner == address(0x0)){
         revert("You need to create a forum first."); //t
       }
       if(!forums[msg.sender].userExists[_userAddress]){
         revert("This user does not exist in your forum."); //t
       }
-      if(( getCurrentMCO() + ( forums[msg.sender].cop * _karma)) > balanceOf(msg.sender))
+      if(( getCurrentMCO() + ( forums[msg.sender].cor * _karma)) > balanceOf(msg.sender))
         revert("User is given too much karma. Your balace might not be able to handle it."); //t
 
       uint256 ukey = forums[msg.sender].userKey[_userAddress];
@@ -176,7 +194,11 @@ contract Forum is EIP20Interface {
       return true;
     }
 
-    function getUserByAddress(address _userAddress) public view returns (address usrAddress, string memory usrName, uint256 usrKarma) {
+    function getUserByAddress(address _userAddress)
+    public view returns (address usrAddress,
+                         string memory usrName,
+                         uint256 usrKarma){
+
         if(forums[msg.sender].owner == address(0x0)){
           revert("You need to create a forum first.");
         }
@@ -190,7 +212,11 @@ contract Forum is EIP20Interface {
         return (uaddress, uname, ukarma);
     }
 
-    function getUserByIndex(uint256 _ucount) public view returns (address usrAddress, string memory usrName, uint256 usrKarma){
+    function getUserByIndex(uint256 _ucount)
+    public view returns (address usrAddress,
+                         string memory usrName,
+                         uint256 usrKarma){
+
       if(forums[msg.sender].owner == address(0x0)){
         revert("You need to create a forum first");
       }
@@ -204,22 +230,31 @@ contract Forum is EIP20Interface {
       return (uaddress, uname, ukarma);
       }
 
-    function getUserCount() public view returns (uint256 _ucount){
+    function getUserCount() public view returns (uint256 ucount){
       return forums[msg.sender].userCount;
     }
 
-    function getMyInfo(address _admin) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma) {
+    function getMyInfoByAddress(address _admin)
+    public view returns (address fAddress,
+                         address myAddress,
+                         string memory myUserName,
+                         uint256 myKarma){
+
       bool exists = forums[_admin].userExists[msg.sender];
       if(!exists)
         revert("You are not a member in this forum.");
       uint256 key = forums[_admin].userKey[msg.sender];
       string memory uname = forums[_admin].users[key].userName;
       uint256 karma = forums[_admin].users[key].karma;
-      uint256 fid = forums[_admin].fid;
-      return (fid, _admin, msg.sender, uname, karma);
+      return (_admin, msg.sender, uname, karma);
     }
 
-    function getMyInfoByFid(uint256 _fid) public view returns (uint256 _fID, address _forumAddress, address _myAddress, string memory _userName, uint256 _karma, uint256 _cop, string memory _forumName) {
+    function getMyInfoByFid(uint256 _fid)
+    public view returns (uint256 fID,
+                         address myAddress,
+                         string memory myUserName,
+                         uint256 myKarma){
+
       address admin = fidOwner[_fid];
       bool exists = forums[admin].userExists[msg.sender];
       if(!exists)
@@ -227,18 +262,17 @@ contract Forum is EIP20Interface {
       uint256 key = forums[admin].userKey[msg.sender];
       string memory uname = forums[admin].users[key].userName;
       uint256 karma = forums[admin].users[key].karma;
-      uint256 fid = forums[admin].fid;
-      uint256 cop = forums[admin].cop;
-      string memory fname = forums[admin].forumName;
-      return (fid, admin, msg.sender, uname, karma, cop, fname);
+      return (_fid, msg.sender, uname, karma);
     }
 
-    function getMemberStatus(uint256 _fid) public view returns (uint256 _fID, bool success){
+    function getMemberStatus(uint256 _fid)
+    public view returns (uint256 fID, bool success){
+
       address admin = fidOwner[_fid];
       return (_fid, forums[admin].userExists[msg.sender]);
     }
 
-    function accForumKarma(address _forum) public view returns (uint256) {
+    function accForumKarma(address _forum) public view returns (uint256 totalKarma) {
       uint256 numUsers = forums[_forum].userCount +1;
       uint256 accKarma = 0;
       for(uint256 i = 0; i<numUsers; i++){
@@ -247,24 +281,28 @@ contract Forum is EIP20Interface {
       return accKarma;
     }
 
-    function setCashOutPrice(uint256 p) public returns (uint256 coPrice){
+    function setCashOutRatio(uint256 _cor) public returns (uint256 fcor){
+
       uint256 accKarma = accForumKarma(msg.sender);
-      if(accKarma * p > balanceOf(msg.sender))
-        revert("To high. Aquire more scones or try a lower COP.");
-      forums[msg.sender].cop = p;
-      emit SetCashOutPrice(msg.sender, forums[msg.sender].cop);
-      return forums[msg.sender].cop;
+      if(accKarma * _cor > balanceOf(msg.sender))
+        revert("Too high. Aquire more scones or try a lower COR.");
+      forums[msg.sender].cor = _cor;
+      emit SetCashOutPrice(msg.sender, forums[msg.sender].cor);
+      return forums[msg.sender].cor;
     }
 
-    function getCashOutPrice(address _forum) public view returns (uint256 fcop){
-      return forums[_forum].cop;
+    function getCashOutRatio(address _forum)
+    public view returns (uint256 fcor){
+
+      return forums[_forum].cor;
     }
 
-    function cashOut(address _forum) public returns (bool _succ){
+    function cashOut(address _forum) public returns (bool success){
+
       if (forums[_forum].fid == 0)
         revert("Forum does not exist");
 
-      if (forums[_forum].cop == 0)
+      if (forums[_forum].cor == 0)
         revert("Cash-out price is 0 scones.");
       if(!forums[_forum].userExists[msg.sender])
         revert("You are not a member in this forum.");
@@ -274,7 +312,7 @@ contract Forum is EIP20Interface {
       if(myKarma == 0)
         revert("You need karma to cash out.");
 
-      uint256 price = forums[_forum].cop;
+      uint256 price = forums[_forum].cor;
       if(balances[_forum] < myKarma*price)
         revert("You can not cash out since forum does not have sufficient amount of scones");
       balances[_forum] -= myKarma*price;
@@ -285,8 +323,8 @@ contract Forum is EIP20Interface {
     }
 
     event SetKarma(address _forum, address _userAddress, uint256 _karma);
-    event SetCashOutPrice(address _forum, uint256 _cop);
-    event CashOut(uint256 _cop, uint256 _karma, address _from, address _to);
+    event SetCashOutPrice(address _forum, uint256 _cor);
+    event CashOut(uint256 _cor, uint256 _karma, address _from, address _to);
     event AddUserToForum(address _userAddress, string _userName, uint256 _karma);
     event CreateForum(bool _success, address _forumAddress, string _forumName, uint256 _fid);
 }

@@ -83,7 +83,7 @@ contract('Forum', accounts => {
 
   it('Should return correct forum data via forum address', async () => {
     let res = null;
-    res = await fc.getForumData(accounts[0]);
+    res = await fc.getForumDataByAddress(accounts[0]);
     let owner = res.forumOwner;
     let fName = res.forumName;
     let forumId = res.fid;
@@ -235,25 +235,22 @@ contract('Forum', accounts => {
 
   it('Users 1..7 should be able to fetch its data from forum F1 via forum address', async () => {
     let res = null;
-    let fidChecker = 0;
     let forumAddressChecker = 0;
     let addressChecker = 0;
     let uNameChecker = 0;
     let karmaChecker = 0;
     for (let i = 1; i<8; i++){
-      res = await fc.getMyInfo(accounts[0], {from: accounts[i]});
-      if(res._fID.toNumber() === 1)
-        fidChecker ++;
-      if(res._forumAddress === accounts[0])
+      res = await fc.getMyInfoByAddress(accounts[0], {from: accounts[i]});
+      if(res.fAddress === accounts[0])
         forumAddressChecker++;
-      if(accounts[i] === res._myAddress)
+      if(accounts[i] === res.myAddress)
         addressChecker ++;
-      if(res._userName === i.toString())
+      if(res.myUserName === i.toString())
         uNameChecker ++;
-      if(res._karma.toNumber() === karmaArray[i])
+      if(res.myKarma.toNumber() === karmaArray[i])
         karmaChecker ++;
     }
-    assert(fidChecker === 7);
+
     assert(addressChecker === 7);
     assert(forumAddressChecker === 7);
     assert(uNameChecker === 7);
@@ -263,26 +260,22 @@ contract('Forum', accounts => {
   it('Users 1..7 should be able to fetch its data from forum F1 via fid', async () => {
     let res = null;
     let fidChecker = 0;
-    let forumAddressChecker = 0;
     let addressChecker = 0;
     let uNameChecker = 0;
     let karmaChecker = 0;
     for (let i = 2; i<8; i++){
       res = await fc.getMyInfoByFid(1, {from: accounts[i]});
-      if(res._fID.toNumber() === 1)
+      if(res.fID.toNumber() === 1)
         fidChecker ++;
-      if(res._forumAddress === accounts[0])
-        forumAddressChecker++;
-      if(accounts[i] === res._myAddress)
+      if(accounts[i] === res.myAddress)
         addressChecker ++;
-      if(res._userName === i.toString())
+      if(res.myUserName === i.toString())
         uNameChecker ++;
-      if(res._karma.toNumber() === karmaArray[i])
+      if(res.myKarma.toNumber() === karmaArray[i])
         karmaChecker ++;
     }
     assert(fidChecker === 6);
     assert(addressChecker === 6);
-    assert(forumAddressChecker === 6);
     assert(uNameChecker === 6);
     assert(karmaChecker === 6);
   });
@@ -343,16 +336,16 @@ contract('Forum', accounts => {
     assert(fid.toNumber() === 2);
   });
 
-  it('User 1 should be able to add user 3 to F2', async () => {
+  it('User 1 should be able to add user 2 to F2', async () => {
     let res = null;
-    res = await fc.addUserToForum(accounts[2], "3", 13, {from: accounts[1]});
+    res = await fc.addUserToForum(accounts[2], "2", 13, {from: accounts[1]});
     let args = res.receipt.logs[0].args;
     let userAddress = args._userAddress;
     let userName = args._userName;
     let karma = args._karma.toNumber();
     assert(userAddress === accounts[2]);
-    assert(userName === "3");
     assert(karma === 13);
+    assert(userName === "2");
   });
 
   it('Should be possible to add user 8 to F2', async () => {
@@ -378,57 +371,53 @@ contract('Forum', accounts => {
     assert(msg.includes("This user does not exist."))
   });
 
-  it('Acting as user 3, one should get user data from F1 (using getMyInfoByFid(uint256 x))', async () => {
+  it('Acting as user 2, one should get user data from F1 (using getMyInfoByFid(uint256 x))', async () => {
     let res = null;
     res = await fc.getMyInfoByFid(1, {from: accounts[2]});
-    let fid = res._fID;
-    let forumAddress = res._forumAddress;
-    let myAddress = res._myAddress;
-    let userName = res._userName;
-    let karma = res._karma;
+    let fid = res.fID;
+    let myAddress = res.myAddress;
+    let userName = res.myUserName;
+    let karma = res.myKarma;
     assert(fid.toNumber() === 1);
-    assert(forumAddress === accounts[0] );
     assert(myAddress === accounts[2]);
     assert(karma.toNumber() === 13);
+    assert(userName === "2");
+
   });
 
-  it('Acting as user 3, one should get user data from F1 (using getMyInfo(address a))', async () => {
+  it('Acting as user 2, one should get user data from F1 (using getMyInfoByAddress(address a))', async () => {
     let res = null;
-    res = await fc.getMyInfo(accounts[0], {from: accounts[2]});
-    let fid = res._fID;
-    let forumAddress = res._forumAddress;
-    let myAddress = res._myAddress;
-    let userName = res._userName;
-    let karma = res._karma;
-    assert(fid.toNumber() === 1);
+    res = await fc.getMyInfoByAddress(accounts[0], {from: accounts[2]});
+    let forumAddress = res.fAddress;
+    let myAddress = res.myAddress;
+    let userName = res.myUserName;
+    let karma = res.myKarma;
     assert(forumAddress === accounts[0] );
     assert(myAddress === accounts[2]);
     assert(karma.toNumber() === 13);
+    assert(userName === "2");
+
   });
 
   it('Acting as user 8, one should get user data from F2 (using getMyInfoByFid(uint256 x))', async () => {
     let res = null;
     res = await fc.getMyInfoByFid(2, {from: accounts[8]});
-    let fid = res._fID;
-    let forumAddress = res._forumAddress;
-    let myAddress = res._myAddress;
-    let userName = res._userName;
-    let karma = res._karma;
+    let fid = res.fID;
+    let myAddress = res.myAddress;
+    let userName = res.myUserName;
+    let karma = res.myKarma;
     assert(fid.toNumber() === 2);
-    assert(forumAddress === accounts[1] );
     assert(myAddress === accounts[8]);
     assert(karma.toNumber() === 4);
   });
 
-  it('Acting as user 8, one should get user data from F2 (using getMyInfo(address a))', async () => {
+  it('Acting as user 8, one should get user data from F2 (using getMyInfoByAddress(address a))', async () => {
     let res = null;
-    res = await fc.getMyInfo(accounts[1], {from: accounts[8]});
-    let fid = res._fID;
-    let forumAddress = res._forumAddress;
-    let myAddress = res._myAddress;
-    let userName = res._userName;
-    let karma = res._karma;
-    assert(fid.toNumber() === 2);
+    res = await fc.getMyInfoByAddress(accounts[1], {from: accounts[8]});
+    let forumAddress = res.fAddress;
+    let myAddress = res.myAddress;
+    let userName = res.myUserName;
+    let karma = res.myKarma;
     assert(forumAddress === accounts[1] );
     assert(myAddress === accounts[8]);
     assert(karma.toNumber() === 4);
@@ -445,11 +434,11 @@ contract('Forum', accounts => {
     assert(msg.includes('You are not a member in this forum.'));
   });
 
-  it('Acting as user 8, one should NOT get user data from F1 (using getMyInfo(address a))', async () => {
+  it('Acting as user 8, one should NOT get user data from F1 (using getMyInfoByAddress(address a))', async () => {
     let res = null;
     let msg = '';
     try{
-      res = await fc.getMyInfo(accounts[0], {from: accounts[8]});
+      res = await fc.getMyInfoByAddress(accounts[0], {from: accounts[8]});
     }catch(e){
       msg = e.message;
     }
@@ -459,13 +448,13 @@ contract('Forum', accounts => {
   it('Acting as user 8, one should be able to see it is a member in F2', async () => {
     let res = null;
     res = await fc.getMemberStatus(2, {from: accounts[8]});
-    assert(res === true);
+    assert(res.success === true);
   });
 
   it('Acting as user 8, one should be able to see it is NOT a member in F1', async () => {
     let res = null;
     res = await fc.getMemberStatus(1, {from: accounts[8]});
-    assert(res === false);
+    assert(res.success === false);
   });
 
   it('Should be able to calculate an accumulated karma sum', async () => {
@@ -498,26 +487,26 @@ contract('Forum', accounts => {
   });
 //This test
 // max is 87
-  it("User 0 should not be able to set COP to a value that the user's balance can't handle.", async () => {
+  it("User 0 should not be able to set COR to a value that the user's balance can't handle.", async () => {
     let res = null;
     let msg = '';
     try{
-      res = await fc.setCashOutPrice(88);
+      res = await fc.setCashOutRatio(88);
     }catch(e){
       msg = e.message;
     }
-    assert(msg.includes('To high. Aquire more scones or try a lower COP.'));
+    assert(msg.includes('Too high. Aquire more scones or try a lower COR.'));
   });
 
-  it("User 0 should be able to set COP to a value that the user's balance can handle.", async () => {
+  it("User 0 should be able to set COR to a value that the user's balance can handle.", async () => {
     let fd = null;
     fd = await fc.getForumDataByFid(1);
-    let fcopBefore = fd.cop.toNumber();
-    await fc.setCashOutPrice(10);
+    let fcorBefore = fd.cor.toNumber();
+    await fc.setCashOutRatio(10);
     fd = await fc.getForumDataByFid(1);
-    let fcopAfter = fd.cop.toNumber();
-    assert(fcopBefore === 0);
-    assert(fcopAfter === 10);
+    let fcorAfter = fd.cor.toNumber();
+    assert(fcorBefore === 0);
+    assert(fcorAfter === 10);
   });
 
   it("User 9 should not be able to cash out from F1 since 9 is not a member in F1.", async () => {
@@ -553,11 +542,11 @@ contract('Forum', accounts => {
     assert(msg.includes('You need to create a forum first.'))
   });
 
-  it("User 0 can not add user 9 to F1 if user 9's karma is set to high", async () => {
+  it("User 0 can not add user 9 to F1 if user 9's karma is set too high", async () => {
     let res = null;
     let msg = '';
     try{
-      // to high if set to 887, (works if 886)
+      // too high if set to 887, (works if 886)
       res = await fc.addUserToForum(accounts[9], "9", 887)
     }catch(e){
       msg = e.message;
@@ -565,7 +554,7 @@ contract('Forum', accounts => {
     assert(msg.includes('User is given too much karma. Your balace might not be able to handle it.'))
   });
 
-  it("User 0 can add user 9 to F1 if user 9's karma is not set to high. (It is set to 0).", async () => {
+  it("User 0 can add user 9 to F1 if user 9's karma is not set too high. (It is set to 0).", async () => {
     let res = null;
     await fc.addUserToForum(accounts[9], "9", 0);
     res = await fc.getUserByAddress(accounts[9]);
@@ -577,7 +566,7 @@ contract('Forum', accounts => {
     assert(k === 0);
   });
 
-  it("User 0 can not change user 9's karma to a value that is to high", async () => {
+  it("User 0 can not change user 9's karma to a value that is too high", async () => {
     let res = null;
     let msg = '';
     try{
@@ -615,11 +604,11 @@ contract('Forum', accounts => {
   it('User 1 should be able to cash out from F1', async () => {
     let res = null;
     res = await fc.cashOut(accounts[0], {from: accounts[1]});
-    let cop = res.logs[0].args._cop.toNumber();
+    let cor = res.logs[0].args._cor.toNumber();
     let karma = res.logs[0].args._karma.toNumber();
     let forum = res.logs[0].args._from;
     let to = res.logs[0].args._to;
-    assert(cop === 10);
+    assert(cor === 10);
     assert(karma === 10);
     assert(forum === accounts[0]);
     assert(to === accounts[1]);
@@ -651,17 +640,17 @@ contract('Forum', accounts => {
   });
 
 //4+13 = 17
-  it('Given that F2 has a set COP, user 8 shold be able to cash out from F2', async () => {
-    await fc.setCashOutPrice(1, {from: accounts[1]});
+  it('Given that F2 has a set COR, user 8 shold be able to cash out from F2', async () => {
+    await fc.setCashOutRatio(1, {from: accounts[1]});
     let ud = null;
     let res = null;
     res = await fc.cashOut(accounts[1], {from: accounts[8]});
-    let cop = res.logs[0].args._cop.toNumber();
+    let cor = res.logs[0].args._cor.toNumber();
     let karma = res.logs[0].args._karma.toNumber();
     let forum = res.logs[0].args._from;
     let to = res.logs[0].args._to;
     assert(karma === 4);
-    assert(cop === 1)
+    assert(cor === 1)
     assert(forum === accounts[1]);
     assert(to === accounts[8]);
   });
@@ -681,16 +670,16 @@ contract('Forum', accounts => {
   it('The rest of all users in F1 (except 0) should be able to cash out', async () => {
     let ud = null;
     let bal = null;
-    let cop = 0;
+    let cor = 0;
     let errors = 0;
     let check = 0;
     for (var i = 2; i < 8 ; i++) {
       try{
         ud = await fc.getUserByIndex(i);
-        cop = await fc.getCashOutPrice(accounts[0]);
+        cor = await fc.getCashOutRatio(accounts[0]);
         res = await fc.cashOut(accounts[0], {from: accounts[i]});
         bal = await fc.balanceOf(accounts[i]);
-        if(bal.toNumber() === cop.toNumber() * ud.usrKarma.toNumber())
+        if(bal.toNumber() === cor.toNumber() * ud.usrKarma.toNumber())
           check ++;
       }catch(e){
         errors ++;
@@ -699,10 +688,10 @@ contract('Forum', accounts => {
     // and user 9...
     try{
       ud = await fc.getUserByIndex(8);
-      cop = await fc.getCashOutPrice(accounts[0]);
+      cor = await fc.getCashOutRatio(accounts[0]);
       res = await fc.cashOut(accounts[0], {from: accounts[9]});
       bal = await fc.balanceOf(accounts[9]);
-      if(bal.toNumber() === cop.toNumber() * ud.usrKarma.toNumber())
+      if(bal.toNumber() === cor.toNumber() * ud.usrKarma.toNumber())
         check ++;
     }catch(e){
       errors ++;
