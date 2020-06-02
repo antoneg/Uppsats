@@ -1,0 +1,63 @@
+Contract: Forum
+    ✓ Should deploy contract
+    ✓ Initial balance should be 10000
+    ✓ Name of token should be "Scone"
+    ✓ Symbol of token should be "SCN"
+    ✓ Forum counter should be 0
+    ✓ User 0 should create forum, F1 (98ms)
+    ✓ User 0 should NOT be able to create a forum again (65ms)
+    ✓ Forum counter should be 1
+    ✓ Should return correct forum data via fid
+    ✓ Should return correct forum data via forum address
+    ✓ Only one user should be registered in F1
+    ✓ Only user 0 should be registered in F1 (using getUserByIndex(uint256 x))
+    ✓ Only user 0 should be registered in F1 (using getUserData(address user))
+    ✓ Should not be possoble to get a non-existing user (using getUserByIndex(uint256 x))
+    ✓ Should not be possoble to get a non-existing user (using getUserByAddress(address a))
+    ✓ Using the contract methods, user 1 should not be able to get user data without having a forum (using getUserByIndex(uint256 x))
+    ✓ Using the contract methods, user 1 should not be able to get user data without having a forum  (using getUserByAddress(address a))
+    ✓ Should not be possoble to get a non-existing forum
+    ✓ User 0 should be able to add user 1 to F1 (76ms)
+    ✓ Should not be possible to add user 1 again (51ms)
+    ✓ A user with no forum ownership should not be able to add users (44ms)
+    ✓ User 0 should add users 2..7 to forum F1 (418ms)
+    ✓ Users 1..7 should be able to fetch its data from forum F1 via forum address (205ms)
+    ✓ Users 1..7 should be able to fetch its data from forum F1 via fid (129ms)
+    ✓ User 0 should be able to get user data from ALL its users (via user addresses) (144ms)
+    ✓ User 0 should be able to get user data from ALL its users (via user indexes) (154ms)
+    ✓ User 1 should create forum, F2  (65ms)
+    ✓ User 1 should be able to add user 2 to F2 (62ms)
+    ✓ Should be possible to add user 8 to F2 (62ms)
+    ✓ User 8 should not exist in F1
+    ✓ Acting as user 2, one should get user data from F1 (using getMyInfoByFid(uint256 x))
+    ✓ Acting as user 2, one should get user data from F1 (using getMyInfoByAddress(address a))
+    ✓ Acting as user 8, one should get user data from F2 (using getMyInfoByFid(uint256 x))
+    ✓ Acting as user 8, one should get user data from F2 (using getMyInfoByAddress(address a))
+    ✓ Acting as user 8, one should NOT get user data from F1 (using getMyInfoByFid(uint256 x))
+    ✓ Acting as user 8, one should NOT get user data from F1 (using getMyInfoByAddress(address a))
+    ✓ Acting as user 8, one should be able to see it is a member in F2
+    ✓ Acting as user 8, one should be able to see it is NOT a member in F1
+    ✓ Should be able to calculate an accumulated karma sum (83ms)
+    ✓ User 0 should not be able to cash out from F3 since F3 does not exist (49ms)
+    ✓ User 8 should not be able to cash out from F2 since cash-out price is 0 (44ms)
+    ✓ User 0 should not be able to set COR to a value that the user's balance can't handle. (61ms)
+    ✓ User 0 should be able to set COR to a value that the user's balance can handle. (79ms)
+    ✓ User 9 should not be able to cash out from F1 since 9 is not a member in F1. (43ms)
+    ✓ User 0 should not be able to set user 9's karma since 9 is not a member in F1. (42ms)
+    ✓ User 9 can not set a user's karma since 9 does not own a forum. (45ms)
+    ✓ User 0 can not add user 9 to F1 if user 9's karma is set too high (70ms)
+    ✓ User 0 can add user 9 to F1 if user 9's karma is not set too high. (It is set to 0). (84ms)
+    ✓ User 0 can not change user 9's karma to a value that is too high (64ms)
+    ✓ User 9 should not be able to cash out from F1 since 9's karma is 0. (47ms)
+    ✓ User 0 should be able to set 9's karma in F1 to a value that is as high as possible. (72ms)
+    ✓ User 1 should be able to cash out from F1 (47ms)
+    ✓ Balance of F2 (or user 1) should be equal to what user 1 got from cash out.
+    ✓ Balance of F1 (or user 0) should be 10 000 - balanceOf(user 1)
+    ✓ Acting as user 1, one shold no longer be able to cash out scones from F1 (because karma becomes set to 0 when cash out) (47ms)
+    ✓ Given that F2 has a set COR, user 8 shold be able to cash out from F2 (87ms)
+    ✓ Acting as user 8, one shold NOT be able to cash out from F1 since user 8 is not a member in F1 (47ms)
+    ✓ The rest of all users in F1 (except 0) should be able to cash out (693ms)
+    ✓ Balance of F1 (or user 0) should be 0
+
+
+  59 passing (4s)
